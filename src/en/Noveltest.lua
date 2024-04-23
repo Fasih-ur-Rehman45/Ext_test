@@ -148,8 +148,10 @@ local function getPassage(chapterURL)
     htmlElement = htmlElement:selectFirst("#chr-content")
     local toRemove = {}
     htmlElement:traverse(NodeVisitor(function(v)
-        if v:tagName() == "p" and v:text() == "" then
-            toRemove[#toRemove+1] = v
+        if v:tagName() == "p" then
+            local pText = v:text()
+            local newText = pText:gsub("<[^>]*>", "") -- Remove angle brackets
+            v:text(newText) -- Update paragraph text without angle brackets
         end
     end, nil, true))
     for _,v in pairs(toRemove) do
@@ -189,6 +191,7 @@ local function parseNovel(novelURL)
         title = document:selectFirst(".title"):text(),
         description = document:selectFirst(".desc-text"):text(),
         imageURL = document:selectFirst(".books .book img"):attr("data-src"),
+
         status = ({
             Ongoing = NovelStatus.PUBLISHING,
             Completed = NovelStatus.COMPLETED,
