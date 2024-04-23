@@ -1,4 +1,4 @@
--- {"id":10155,"ver":"1.0.0","libVer":"1.0.0","author":"Confident-hate"}
+-- {"id":10155,"ver":"1.0.2","libVer":"1.0.0","author":"Confident-hate"}
 
 local baseURL = "https://novelbin.com"
 
@@ -149,9 +149,12 @@ local function getPassage(chapterURL)
     local toRemove = {}
     htmlElement:traverse(NodeVisitor(function(v)
         if v:tagName() == "p" then
-            local pText = v:text()
-            local newText = pText:gsub("<[^>]*>", "") -- Remove angle brackets
-            v:text(newText) -- Update paragraph text without angle brackets
+            local newText = v:text():gsub("&%a+;", "")
+            if newText == "" then
+                toRemove[#toRemove+1] = v
+            else
+                v:text(newText)
+            end
         end
     end, nil, true))
     for _,v in pairs(toRemove) do
@@ -191,7 +194,7 @@ local function parseNovel(novelURL)
         title = document:selectFirst(".title"):text(),
         description = document:selectFirst(".desc-text"):text(),
         imageURL = document:selectFirst(".books .book img"):attr("data-src"),
-
+        
         status = ({
             Ongoing = NovelStatus.PUBLISHING,
             Completed = NovelStatus.COMPLETED,
