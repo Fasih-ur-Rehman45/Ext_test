@@ -148,13 +148,8 @@ local function getPassage(chapterURL)
     htmlElement = htmlElement:selectFirst("#chr-content")
     local toRemove = {}
     htmlElement:traverse(NodeVisitor(function(v)
-        if v:tagName() == "p" then
-            local newText = v:text():gsub("&%a+;", "")
-            if newText == "" then
-                toRemove[#toRemove+1] = v
-            else
-                v:text(newText)
-            end
+        if v:tagName() == "p" and v:text() == "" then
+            toRemove[#toRemove+1] = v
         end
     end, nil, true))
     for _,v in pairs(toRemove) do
@@ -163,7 +158,7 @@ local function getPassage(chapterURL)
     local ht = "<h1>" .. title .. "</h1>"
     local pTagList = ""
     pTagList = map(htmlElement:select("p"), text)
-    for k,v in pairs(pTagList) do ht = ht .. "<br><br>" .. v end
+    for k,v in pairs(pTagList) do ht = ht .. "<p><p>" .. v end
     return pageOfElem(Document(ht), true)
 end
 
