@@ -1,6 +1,6 @@
 -- {"id":10155,"ver":"1.0.2","libVer":"1.0.0","author":"Confident-hate"}
 
-local baseURL = "https://novelbin.com"
+local baseURL = "https://allnovelbin.net"
 
 ---@param v Element
 local text = function(v)
@@ -11,7 +11,7 @@ end
 ---@param url string
 ---@param type int
 local function shrinkURL(url)
-    return url:gsub("https://novelbin.com/", "")
+    return url:gsub("https://allnovelbin.net/", "")
 end
 
 ---@param url string
@@ -190,7 +190,7 @@ local function parseNovel(novelURL)
     local url = baseURL .. "/" .. novelURL
     local document = GETDocument(url)
     ---local chID = string.match(url, ".*b/(.*)$")
-    local chID = (string.match(url, ".*b/(.*)") or ""):gsub("(.-)%-145%d%d%d%d%d$", "%1")
+    local chID = (string.match(url, ".*n/(.*)") or ""):gsub("(.-)%-145%d%d%d%d%d$", "%1")
     local chapterURL = baseURL .. "/ajax/chapter-archive?novelId=" .. chID
     local chapterDoc = GETDocument(chapterURL)
     return NovelInfo {
