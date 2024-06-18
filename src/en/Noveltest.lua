@@ -1,6 +1,6 @@
 -- {"id":10155,"ver":"1.0.2","libVer":"1.0.0","author":"Confident-hate"}
 
-local baseURL = "https://allnovelbin.net"
+local baseURL = "https://binnovel.com"
 
 ---@param v Element
 local text = function(v)
@@ -11,7 +11,7 @@ end
 ---@param url string
 ---@param type int
 local function shrinkURL(url)
-    return url:gsub("https://allnovelbin.net/", "")
+    return url:gsub("https://binnovel.com/", "")
 end
 
 ---@param url string
@@ -189,8 +189,7 @@ end
 local function parseNovel(novelURL)
     local url = baseURL .. "/" .. novelURL
     local document = GETDocument(url)
-    ---local chID = string.match(url, ".*b/(.*)$")
-    local chID = (string.match(url, ".*n/(.*)") or ""):gsub("(.-)%-145%d%d%d%d%d$", "%1")
+    local chID = (string.match(url, ".*novel.book/(.*)") or ""):gsub("(.-)%-145%d%d%d%d%d$", "%1")
     local chapterURL = baseURL .. "/ajax/chapter-archive?novelId=" .. chID
     local chapterDoc = GETDocument(chapterURL)
     return NovelInfo {
@@ -219,7 +218,7 @@ local function parseListing(listingURL)
     return map(document:selectFirst(".col-novel-main.archive .list.list-novel"):select(".row"), function(v)
         return Novel {
             title = v:selectFirst(".novel-title"):text(),
-            imageURL = v:selectFirst("img.cover"):attr("data-src"):gsub("_200_89", ""),
+            imageURL = v:selectFirst("img.cover.lazy"):attr("data-src"):gsub("_200_89", ""),
             link = shrinkURL(v:selectFirst(".novel-title a"):attr("href"))
         }
     end)
