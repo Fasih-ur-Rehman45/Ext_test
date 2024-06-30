@@ -183,7 +183,6 @@ local function search(data)
         }
     end)
 end
-
 --- @param novelURL string @URL of novel
 --- @return NovelInfo
 local function parseNovel(novelURL)
@@ -195,6 +194,7 @@ local function parseNovel(novelURL)
     return NovelInfo {
         title = document:selectFirst(".title"):text(),
         description = document:selectFirst(".desc-text"):text(),
+        genre = document:selectFirst(".info-meta h3:containsOwn(Genre) + a"):text(),
         imageURL = document:selectFirst(".books .book img"):attr("data-src"),
         
         status = ({
