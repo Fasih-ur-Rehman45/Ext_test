@@ -146,30 +146,31 @@ local function getPassage(chapterURL)
     local htmlElement = GETDocument(chapterURL)
     local title = htmlElement:selectFirst(".chr-title"):attr("title")
     htmlElement = htmlElement:selectFirst("#chr-content")
-    local toRemove = {}
-    htmlElement:traverse(NodeVisitor(function(v)
-        if v:tagName() == "p" then
-            if v:text() == "" then
-                -- If <p> element is empty, add it to the list of elements to remove
-                toRemove[#toRemove+1] = v
-            else
-                -- If <p> element is non-empty, encode HTML special characters within it
-                local textContent = v:text()
-                v:text(textContent:gsub("<", "&lt;"):gsub(">", "&gt;"))
-            end
+    local contentList = {}
+    local function processNode(node)
+        if node:text() and node:text() ~= "" then
+            local textContent = node:text():gsub("<", "&lt;"):gsub(">", "&gt;")
+            contentList[#contentList + 1] = textContent
         end
-
-    end, nil, true))
-    for _,v in pairs(toRemove) do
-        v:remove()
     end
+    processNode(htmlElement)
     local ht = "<h1>" .. title .. "</h1>"
-    local pTagList = ""
-    pTagList = map(htmlElement:select("p"), text)
-    for k,v in pairs(pTagList) do ht = ht .. "<br><br>" .. v end
+    local pTagList = map(htmlElement:select("p"), text)
+    if #pTagList > 0 then
+        local modifiedContentHTML = ""
+        for _, v in pairs(pTagList) do
+            modifiedContentHTML = modifiedContentHTML .. "<br><br>" .. v
+        end
+        ht = ht .. modifiedContentHTML
+    else
+        local contentHTML = ""
+        for _, v in pairs(contentList) do
+            contentHTML = contentHTML ..  "<br><br>" .. v
+        end
+        ht = ht .. contentHTML
+    end
     return pageOfElem(Document(ht), true)
 end
-
 --- @param data table
 local function search(data)
     local queryContent = data[QUERY]
