@@ -1,4 +1,4 @@
--- {"id":4501,"ver":"1.0.4","libVer":"1.0.0","author":"MechTechnology"}
+-- {"id":4502,"ver":"1.0.5","libVer":"1.0.0","author":"MechTechnology"}
 
 return Require("Madara")("https://truthnovel.top", {
 	id = 4501,
