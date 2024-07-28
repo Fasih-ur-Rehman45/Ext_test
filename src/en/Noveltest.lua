@@ -146,14 +146,22 @@ local function getPassage(chapterURL)
     local htmlElement = GETDocument(chapterURL)
     local title = htmlElement:selectFirst(".chr-title"):attr("title")
     htmlElement = htmlElement:selectFirst("#chr-content")
-    local contentList = {}
-    local function processNode(node)
-        if node:text() and node:text() ~= "" then
-            local textContent = node:text():gsub("<", "&lt;"):gsub(">", "&gt;")
-            contentList[#contentList + 1] = textContent
+    htmlElement:select("div,h6,p[style='display: none;']"):remove()
+    local chapterText = htmlElement:html() or ""
+    local toRemove = {}
+    htmlElement:traverse(NodeVisitor(function(v)
+        if v:tagName() == "p" then
+            if v:text() == "" then
+                toRemove[#toRemove+1] = v
+            else
+                local textContent = v:text()
+                v:text(textContent:gsub("<", "&lt;"):gsub(">", "&gt;"))
+            end
         end
+    end, nil, true))
+    for _,v in pairs(toRemove) do
+        v:remove()
     end
-    processNode(htmlElement)
     local ht = "<h1>" .. title .. "</h1>"
     local pTagList = map(htmlElement:select("p"), text)
     if #pTagList > 0 then
@@ -163,11 +171,7 @@ local function getPassage(chapterURL)
         end
         ht = ht .. modifiedContentHTML
     else
-        local contentHTML = ""
-        for _, v in pairs(contentList) do
-            contentHTML = contentHTML ..  "<br><br>" .. v
-        end
-        ht = ht .. contentHTML
+        ht = ht .. chapterText
     end
     return pageOfElem(Document(ht), true)
 end
