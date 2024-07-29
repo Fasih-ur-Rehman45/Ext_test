@@ -165,11 +165,11 @@ local function getPassage(chapterURL)
     local ht = "<h1>" .. title .. "</h1>"
     local pTagList = map(htmlElement:select("p"), text)
     if #pTagList > 0 then
-        local modifiedContentHTML = ""
+        local htmlContent = ""
         for _, v in pairs(pTagList) do
-            modifiedContentHTML = modifiedContentHTML .. "<br><br>" .. v
+            htmlContent = htmlContent .. "<br><br>" .. v
         end
-        ht = ht .. modifiedContentHTML
+        ht = ht .. htmlContent
     else
         ht = ht .. chapterText
     end
@@ -199,7 +199,6 @@ local function parseNovel(novelURL)
     return NovelInfo {
         title = document:selectFirst(".title"):text(),
         description = document:selectFirst(".desc-text"):text(),
-        genre = document:selectFirst(".info-meta h3:containsOwn(Genre) + a"),
         imageURL = document:selectFirst(".books .book img"):attr("data-src"),
         
         status = ({
