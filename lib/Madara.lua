@@ -128,7 +128,7 @@ function defaults:getPassage(url)
 	htmlElement = htmlElement:selectFirst("div.text-right")
 
 	-- Chapter title inserted before chapter text.
-		--htmlElement:prepend("<h1>" .. title .. "</h1>")
+		htmlElement:prepend("<h1>" .. title .. "</h1>")
 
 	-- Remove/modify unwanted HTML elements to get a clean webpage.
 	htmlElement:select("div.lnbad-tag"):remove() -- LightNovelBastion text size
