@@ -125,10 +125,8 @@ end
 function defaults:getPassage(url)
 	local htmlElement = GETDocument(self.expandURL(url)):selectFirst("div.c-blog-post")
 	local title = htmlElement:selectFirst("ol.breadcrumb li.active"):text()
-	htmlElement = htmlElement:selectFirst("div.text-left")
-	if(htmlElement:selectFirst("div.text-left") == nil) then  --for TeamXNovel
-		htmlElement = htmlElement:selectFirst("div.text-right")
-	end
+	htmlElement = htmlElement:selectFirst("div.text-right")
+
 	-- Chapter title inserted before chapter text.
 		htmlElement:prepend("<h1>" .. title .. "</h1>")
 
