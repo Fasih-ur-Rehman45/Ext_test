@@ -15,6 +15,13 @@ local function expandURL(url)
     return baseURL .. url
 end
 
+--- @type Filter[] | Array
+local searchFilters = {
+    DropdownFilter(1, "Order by", { "View", "Name", "Addition Date", "Reader", "Chapter" }),
+    DropdownFilter(2, "Sort by", { "Descending", "Ascending" }),
+    DropdownFilter(3, "Status", { "All", "Ongoing", "Completed" })
+}
+
 --- @type ChapterType
 local chapterType = ChapterType.HTML
 --- @type Listing[] | Array
