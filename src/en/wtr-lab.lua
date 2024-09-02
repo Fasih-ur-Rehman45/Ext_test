@@ -77,6 +77,18 @@ local function parseNovel(novelURL)
     [document:selectFirst("td:contains('Status')"):next():text():gsub("[%t\n]", "")]
     }
 end
+    -- Parse chapters
+    -- local chapterJson = document:selectFirst("#__NEXT_DATA__"):html()
+    -- local jsonData = JSONDecode(chapterJson)
+    -- local chapters = jsonData.props.pageProps.serie.chapters
+    -- for i, jsonChapter in ipairs(chapters) do
+    --     novel:addChapter(ChapterItem {
+    --         name = jsonChapter.title,
+    --         path = "en/serie-" .. jsonData.props.pageProps.serie.serie_data.raw_id .. "/" .. jsonData.props.pageProps.serie.serie_data.slug .. "/chapter-" .. jsonChapter.order,
+    --         releaseTime = jsonChapter.created_at:sub(1, 10)
+    --     })
+    --     return novel
+    -- end
 
 --- @param data table @of applied filter values [QUERY] is the search query, may be empty.
 --- @return Novel[] | Array
@@ -111,4 +123,5 @@ return {
     parseNovel = parseNovel,
     shrinkURL = shrinkURL,
     expandURL = expandURL,
+    searchFilters = searchFilters
 }
