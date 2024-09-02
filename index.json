@@ -49,6 +49,16 @@
       "ver": "1.0.5",
       "libVer": "1.0.0",
       "md5": ""
+    },
+    {
+      "name": "WTR-LAB",
+      "fileName": "wtr-lab",
+      "imageURL": "https://wtr-lab.com/flask-white.svg",
+      "id": 10255,
+      "lang": "en",
+      "ver": "1.0.0",
+      "libVer": "1.0.0",
+      "md5": ""
     }
   ]
 }
