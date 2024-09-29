@@ -114,7 +114,7 @@ return {
     id = 10255,
     name = "WTR-LAB",
     baseURL = baseURL,
-    imageURL = "https://wtr-lab.com/flask-white.svg",
+    imageURL = "https://imgur.com/a/LAE1Hnp",
     hasSearch = true,
     search = search,
     listings = listings,
