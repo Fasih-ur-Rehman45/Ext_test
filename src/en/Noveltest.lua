@@ -1,6 +1,6 @@
--- {"id":10155,"ver":"1.0.4","libVer":"1.0.0","author":"Confident-hate"}
+-- {"id":10155,"ver":"1.0.3","libVer":"1.0.0","author":"Confident-hate"}
 
-local baseURL = "https://novelbin.com"
+local baseURL = "https://binnovel.com"
 
 ---@param v Element
 local text = function(v)
@@ -11,7 +11,7 @@ end
 ---@param url string
 ---@param type int
 local function shrinkURL(url)
-    return url:gsub("https://novelbin.com/", "")
+    return url:gsub("https://binnovel.com/", "")
 end
 
 ---@param url string
@@ -180,7 +180,7 @@ local function search(data)
     local queryContent = data[QUERY]
     local page = data[PAGE]
     local doc = GETDocument(baseURL .. "/search/?keyword=" .. queryContent .. "&page=" .. page)
-    return map(doc:selectFirst(".col-novel-main.archive .list.list-novel.col-xs-12"):select(".row"), function(v)
+    return map(doc:selectFirst(".col-novel-main.archive .list.list-novel"):select(".row"), function(v)
         return Novel {
             title = v:selectFirst(".novel-title"):text(),
             imageURL = v:selectFirst("img.cover"):attr("src"):gsub("_200_89", ""),
@@ -191,7 +191,7 @@ end
 --- @param novelURL string @URL of novel
 --- @return NovelInfo
 local function parseNovel(novelURL)
-    local url = baseURL .. "/" .. novelURL
+    local url = novelURL
     local document = GETDocument(url)
     local chID = (string.match(url, ".*b/(.*)"))
     local chapterURL = baseURL .. "/ajax/chapter-archive?novelId=" .. chID
@@ -219,7 +219,7 @@ end
 
 local function parseListing(listingURL)
     local document = GETDocument(listingURL)
-    return map(document:selectFirst(".col-novel-main.archive .list.list-novel.col-xs-12"):select(".row"), function(v)
+    return map(document:selectFirst(".col-novel-main.archive .list.list-novel"):select(".row"), function(v)
         return Novel {
             title = v:selectFirst(".novel-title"):text(),
             imageURL = v:selectFirst("img.cover.lazy"):attr("data-src"):gsub("_200_89", ""),
