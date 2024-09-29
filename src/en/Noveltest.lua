@@ -1,4 +1,4 @@
--- {"id":10155,"ver":"1.0.5","libVer":"1.0.0","author":"Confident-hate"}
+-- {"id":10155,"ver":"1.0.6","libVer":"1.0.0","author":"Confident-hate"}
 
 local baseURL = "https://binnovel.com"
 
@@ -17,7 +17,8 @@ end
 ---@param url string
 ---@param type int
 local function expandURL(url)
-    return baseURL .. "/" .. url
+    return url
+    
 end
 
 local GENRE_FILTER = 2
