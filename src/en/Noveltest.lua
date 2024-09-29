@@ -1,6 +1,6 @@
--- {"id":10155,"ver":"1.0.6","libVer":"1.0.0","author":"Confident-hate"}
+-- {"id":10155,"ver":"1.0.7","libVer":"1.0.0","author":"Confident-hate"}
 
-local baseURL = "https://binnovel.com"
+local baseURL = "https://novelbin.com"
 
 ---@param v Element
 local text = function(v)
@@ -11,14 +11,13 @@ end
 ---@param url string
 ---@param type int
 local function shrinkURL(url)
-    return url:gsub("https://binnovel.com/", "")
+    return url:gsub("https://novelbin.com/", "")
 end
 
 ---@param url string
 ---@param type int
 local function expandURL(url)
-    return url
-    
+    return baseURL .. "/" .. url
 end
 
 local GENRE_FILTER = 2
@@ -181,7 +180,7 @@ local function search(data)
     local queryContent = data[QUERY]
     local page = data[PAGE]
     local doc = GETDocument(baseURL .. "/search/?keyword=" .. queryContent .. "&page=" .. page)
-    return map(doc:selectFirst(".col-novel-main.archive .list.list-novel"):select(".row"), function(v)
+    return map(doc:selectFirst(".list.list-novel"):select(".row"), function(v)
         return Novel {
             title = v:selectFirst(".novel-title"):text(),
             imageURL = v:selectFirst("img.cover"):attr("src"):gsub("_200_89", ""),
@@ -192,10 +191,12 @@ end
 --- @param novelURL string @URL of novel
 --- @return NovelInfo
 local function parseNovel(novelURL)
-    local url = novelURL
+    local url = baseURL .. "/" .. novelURL
     local document = GETDocument(url)
     local chID = (string.match(url, ".*b/(.*)"))
-    local chapterURL = baseURL .. "/ajax/chapter-archive?novelId=" .. chID
+    --Todo Find A better way to get the chapter list
+    local tempUrl = "https://binnovel.com"
+    local chapterURL = tempUrl .. "/ajax/chapter-archive?novelId=" .. chID
     local chapterDoc = GETDocument(chapterURL)
     return NovelInfo {
         title = document:selectFirst(".title"):text(),
@@ -220,7 +221,7 @@ end
 
 local function parseListing(listingURL)
     local document = GETDocument(listingURL)
-    return map(document:selectFirst(".col-novel-main.archive .list.list-novel"):select(".row"), function(v)
+    return map(document:selectFirst(".list.list-novel"):select(".row"), function(v)
         return Novel {
             title = v:selectFirst(".novel-title"):text(),
             imageURL = v:selectFirst("img.cover.lazy"):attr("data-src"):gsub("_200_89", ""),
