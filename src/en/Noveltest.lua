@@ -1,4 +1,4 @@
--- {"id":10155,"ver":"1.0.8","libVer":"1.0.0","author":"Confident-hate"}
+-- {"id":10155,"ver":"1.0.9","libVer":"1.0.0","author":"Confident-hate"}
 
 local baseURL = "https://novelbin.com"
 
@@ -208,13 +208,17 @@ local function parseNovel(novelURL)
         })[document:selectFirst(".info .text-primary"):text()],
         chapters = AsList(
             map(chapterDoc:select(".list-chapter li a"), function(v)
-                local title = v:attr("title")
-                if not string.find(title, "PREMIUM") then
-                    return NovelChapter {
-                        order = v,
-                        title = v:attr("title"),
-                        link = v:attr("href")
-                    }
+                local titleElement = v:selectFirst(".nchr-text.chapter-title")
+                if titleElement then
+                    local premiumLabel = titleElement:selectFirst(".premium-label")
+                    -- Only include the chapter if it does not have a premium label
+                    if not premiumLabel then
+                        return NovelChapter {
+                            order = v,
+                            title = v:attr("title"),
+                            link = v:attr("href")
+                        }
+                    end
                 end
             end)
         )
