@@ -1,4 +1,4 @@
--- {"id":10155,"ver":"1.1.1","libVer":"1.0.0","author":"Confident-hate"}
+-- {"id":10155,"ver":"1.1.2","libVer":"1.0.0","author":"Confident-hate"}
 
 local baseURL = "https://novelbin.com"
 
@@ -206,7 +206,7 @@ local function parseNovel(novelURL)
             Ongoing = NovelStatus.PUBLISHING,
             Completed = NovelStatus.COMPLETED,
         })[document:selectFirst(".info .text-primary"):text()],
-        authors = { document:selectFirst(".info > li:nth-child(1)"):text():match("^Author:%s*") or document:selectFirst(".info > li:nth-child(2)"):text():match("^Author:%s*") },
+        authors = { document:selectFirst(".info > li:nth-child(1)"):text():gsub("^Author:%s*", "Author: ") or document:selectFirst(".info > li:nth-child(2)"):text():gsub("^Author:%s*", "Author: ") },
         genres = (function()
             local firstLi = document:selectFirst(".info > li:nth-child(1)")
             if firstLi and firstLi:selectFirst("h3"):text() == "Alternative names:" then
