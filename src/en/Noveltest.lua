@@ -1,4 +1,4 @@
--- {"id":10155,"ver":"1.1.0","libVer":"1.0.0","author":"Confident-hate"}
+-- {"id":10155,"ver":"1.1.1","libVer":"1.0.0","author":"Confident-hate"}
 
 local baseURL = "https://novelbin.com"
 
@@ -206,8 +206,17 @@ local function parseNovel(novelURL)
             Ongoing = NovelStatus.PUBLISHING,
             Completed = NovelStatus.COMPLETED,
         })[document:selectFirst(".info .text-primary"):text()],
-        authors = { document:selectFirst(".info > li:nth-child(1)"):text():match("Author:(.*)") or document:selectFirst(".info > li:nth-child(2)"):text():match("Author:(.*)") },
-        genres = map(document:select(".info > li:nth-child(2) a"), text ) or map(document:select(".info > li:nth-child(3) a"), text ),
+        authors = { document:selectFirst(".info > li:nth-child(1)"):text():match("^Author:%s*") or document:selectFirst(".info > li:nth-child(2)"):text():match("^Author:%s*") },
+        genres = (function()
+            local firstLi = document:selectFirst(".info > li:nth-child(1)")
+            if firstLi and firstLi:selectFirst("h3"):text() == "Alternative names:" then
+                -- If "Alternative names" is present, genres are in the third <li>
+                return map(document:select(".info > li:nth-child(3) a"), text)
+            else
+                -- Otherwise, genres are in the second <li>
+                return map(document:select(".info > li:nth-child(2) a"), text)
+            end
+        end)(),
         chapters = AsList(
             map(chapterDoc:select(".list-chapter li a"), function(v)
                 local titleElement = v:selectFirst(".nchr-text.chapter-title")
