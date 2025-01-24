@@ -1,4 +1,4 @@
--- {"id":10155,"ver":"1.0.7","libVer":"1.0.0","author":"Confident-hate"}
+-- {"id":10155,"ver":"1.0.8","libVer":"1.0.0","author":"Confident-hate"}
 
 local baseURL = "https://novelbin.com"
 
@@ -21,7 +21,7 @@ local function expandURL(url)
 end
 
 local GENRE_FILTER = 2
-local GENRE_PARAMS = { 
+local GENRE_PARAMS = {
     "",
     "/genre/action",
     "/genre/adult",
@@ -152,14 +152,14 @@ local function getPassage(chapterURL)
     htmlElement:traverse(NodeVisitor(function(v)
         if v:tagName() == "p" then
             if v:text() == "" then
-                toRemove[#toRemove+1] = v
+                toRemove[#toRemove + 1] = v
             else
                 local textContent = v:text()
                 v:text(textContent:gsub("<", "&lt;"):gsub(">", "&gt;"))
             end
         end
     end, nil, true))
-    for _,v in pairs(toRemove) do
+    for _, v in pairs(toRemove) do
         v:remove()
     end
     local ht = "<h1>" .. title .. "</h1>"
@@ -194,7 +194,7 @@ local function parseNovel(novelURL)
     local url = baseURL .. "/" .. novelURL
     local document = GETDocument(url)
     local chID = (string.match(url, ".*b/(.*)"))
-    --Todo Find A better way to get the chapter list
+    --TODO Find A better way to get the chapter list
     local tempUrl = "https://binnovel.com"
     local chapterURL = tempUrl .. "/ajax/chapter-archive?novelId=" .. chID
     local chapterDoc = GETDocument(chapterURL)
@@ -202,19 +202,21 @@ local function parseNovel(novelURL)
         title = document:selectFirst(".title"):text(),
         description = document:selectFirst(".desc-text"):text(),
         imageURL = document:selectFirst(".books .book img"):attr("data-src"),
-        
         status = ({
             Ongoing = NovelStatus.PUBLISHING,
             Completed = NovelStatus.COMPLETED,
         })[document:selectFirst(".info .text-primary"):text()],
         chapters = AsList(
-                map(chapterDoc:select(".list-chapter li a"), function(v)
+            map(chapterDoc:select(".list-chapter li a"), function(v)
+                local title = v:attr("title")
+                if not string.find(title, "PREMIUM") then
                     return NovelChapter {
                         order = v,
                         title = v:attr("title"),
                         link = v:attr("href")
                     }
-                end)
+                end
+            end)
         )
     }
 end
@@ -238,7 +240,7 @@ local function getListing(name, inc, sortString)
         local page = data[PAGE]
         local genreValue = ""
         if genre ~= nil then
-            genreValue = GENRE_PARAMS[genre+1]
+            genreValue = GENRE_PARAMS[genre + 1]
         end
         local url = baseURL .. genreValue .. "?page=" .. page
         if genreValue == "" then
