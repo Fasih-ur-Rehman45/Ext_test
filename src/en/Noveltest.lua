@@ -224,14 +224,17 @@ local function parseNovel(novelURL)
         end)(),
         chapters = AsList(
             map(chapterDoc:select(".list-chapter li a"), function(v)
-                local title = v:attr("title") or v:text()
-                if not title:lower():find("premium") then
+                local titleElement = v:selectFirst(".nchr-text.chapter-title")
+                if titleElement then
+                    local premiumLabel = titleElement:selectFirst(".premium-label")
+                    if not premiumLabel then
                         return NovelChapter {
                             order = v,
                             title = v:attr("title"),
                             link = v:attr("href")
                         }
                     end
+                end
                 return nil
             end),
             function(chapter)
