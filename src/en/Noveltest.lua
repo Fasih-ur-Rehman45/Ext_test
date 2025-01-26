@@ -1,4 +1,4 @@
--- {"id":10155,"ver":"1.1.8","libVer":"1.0.0","author":"Confident-hate"}
+-- {"id":10155,"ver":"1.1.9","libVer":"1.0.0","author":"Confident-hate"}
 
 local baseURL = "https://novelbin.com"
 
@@ -164,7 +164,12 @@ local function getPassage(chapterURL)
     end
     local ht = "<h1>" .. title .. "</h1>"
     local pTagList = map(htmlElement:select("p"), text)
-    if #pTagList > 1 then
+    local pCount = #pTagList
+    local brCount = 0
+    for _ in chapterText:gmatch("<br>") do
+        brCount = brCount + 1
+    end
+    if pCount > brCount then
         local htmlContent = ""
         for _, v in pairs(pTagList) do
             htmlContent = htmlContent .. "<br><br>" .. v
