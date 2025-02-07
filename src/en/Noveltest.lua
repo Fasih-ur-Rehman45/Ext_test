@@ -1,4 +1,4 @@
--- {"id":10155,"ver":"1.1.9","libVer":"1.0.0","author":"Confident-hate"}
+-- {"id":10155,"ver":"1.0.10","libVer":"1.0.0","author":"Confident-hate"}
 
 local baseURL = "https://novelbin.com"
 
@@ -224,7 +224,8 @@ local function parseNovel(novelURL)
                     local titleElement = v:selectFirst(".nchr-text.chapter-title")
                     if titleElement then
                         local premiumLabel = titleElement:selectFirst(".premium-label")
-                        if not premiumLabel then
+                        local paidLabel = titleElement:selectFirst(".paid-label")
+                        if not premiumLabel and not paidLabel then
                             return NovelChapter {
                                 order = v,
                                 title = v:attr("title"),
