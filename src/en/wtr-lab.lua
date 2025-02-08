@@ -1,127 +1,171 @@
--- {"id":10255,"ver":"1.0.0","libVer":"1.0.0","author":""}
+-- {"id":10255,"ver":"1.0.1","libVer":"1.0.0","author":""}
 
+local json = Require("dkjson")
 
+--- Identification number of the extension.
+local id = 10255  -- Update with your extension ID
+
+--- Name of extension to display to the user.
+local name = "WTR-LAB"
+
+--- Base URL of the extension.
 local baseURL = "https://wtr-lab.com/"
 
---- @param url string
---- @param type int 
-local function shrinkURL(url)
-    return url:gsub(baseURL, "")
+--- URL of the logo.
+local imageURL = "https://i.imgur.com/ObQtFVW.png"  -- Update correct path
+
+--- Cloudflare protection status.
+local hasCloudFlare = false
+
+--- Search configuration.
+local hasSearch = true
+local isSearchIncrementing = true
+
+--- Filters configuration.
+local ORDER_FILTER_ID = 5
+local SORT_FILTER_ID = 6
+local STATUS_FILTER_ID = 7
+
+--- Filters configuration.
+local searchFilters = {
+    DropdownFilter(ORDER_FILTER_ID, "Order by", {
+        "View",
+        "Name",
+        "Addition Date",
+        "Reader",
+        "Chapter"
+    }),
+    DropdownFilter(SORT_FILTER_ID, "Sort by", {"Descending", "Ascending"}),
+    DropdownFilter(STATUS_FILTER_ID, "Status", {"All", "Ongoing", "Completed"})
+}
+
+--- URL handling functions.
+local function shrinkURL(url, type)
+    return url:gsub(baseURL, ""):gsub("^en", "")
 end
 
---- @param url string
---- @param type int 
-local function expandURL(url)
+local function expandURL(url, type)
+    url = url:gsub("^/", "")
     return baseURL .. url
 end
 
---- @type Filter[] | Array
-local searchFilters = {
-    DropdownFilter(1, "Order by", { "View", "Name", "Addition Date", "Reader", "Chapter" }),
-    DropdownFilter(2, "Sort by", { "Descending", "Ascending" }),
-    DropdownFilter(3, "Status", { "All", "Ongoing", "Completed" })
-}
-
---- @type ChapterType
-local chapterType = ChapterType.HTML
---- @type Listing[] | Array
-local listings = {
-    Listing("Popular Novels", true, function(data)
-        --- @type int
-        local page = data[PAGE]
-        local url = baseURL .. "en/novel-list?orderBy=" .. data[1] .. "&order=" .. data[2] .. "&filter=" .. data[3] .. "&page=" .. page
-        local document = GETDocument(url)
-        local novels = {}
-        for i, element in ipairs(document:select(".serie-item")) do
-            local novel = {
-                name = element:selectFirst(".title-wrap > a"):text(),
-                cover = element:selectFirst("img"):attr("src"),
-                path = element:selectFirst("a"):attr("href")
-            }
-            table.insert(novels, novel)
-        end
-        return novels
-    end)
-}
---- @param chapterURL string 
---- @return string Strings 
+--- Chapter content extraction.
 local function getPassage(chapterURL)
     local url = expandURL(chapterURL, KEY_CHAPTER_URL)
-    local document = GETDocument(url)
-    local chapterJson = document:selectFirst("#__NEXT_DATA__"):html()
-    local jsonData = JSONDecode(chapterJson)
-    local chapterContent = JSONDecode(jsonData.props.pageProps.serie.chapter_data.data.body)
-    local htmlString = ""
-    for i, text in ipairs(chapterContent) do
-        htmlString = htmlString .. "<p>" .. text .. "</p>"
-    end
-
-    return htmlString
+    local doc = GETDocument(url)
+    local script = doc:selectFirst("script#__NEXT_DATA__"):html()
+    local data = json.decode(script)
+    local content = data.props.pageProps.serie.chapter_data.data.body
+    local html = table.concat(map(content, function(v) return "<p>" .. v .. "</p>" end))
+    return html
 end
 
---- @param novelURL string
---- @return NovelInfo
+--- Novel parsing function.
 local function parseNovel(novelURL)
     local url = expandURL(novelURL, KEY_NOVEL_URL)
-    local document = GETDocument(url)
-    return NovelInfo {
-    title = document:selectFirst("h1.text-uppercase"):text(),
-    imageURL = document:selectFirst(".img-wrap > img"):attr("src"),
-    description = document:selectFirst(".lead"):text():trim(),
-    genres = document:selectFirst("td:contains('Genre')"):next():select("a"):eachText():join(", "),
-    author = document:selectFirst("td:contains('Author')"):next():text():gsub("[%t\n]", ""),
-    
-    status =({
-    Ongoing = NovelStatus.PUBLISHING,
-    Completed = NovelStatus.COMPLETED,})
-    [document:selectFirst("td:contains('Status')"):next():text():gsub("[%t\n]", "")]
+    local doc = GETDocument(url)
+    local script = doc:selectFirst("#__NEXT_DATA__"):html()
+    local data = json.decode(script)
+    local serie = data.props.pageProps.serie
+
+    local novelInfo = NovelInfo {
+        title = doc:selectFirst("h1.text-uppercase"):text(),
+        imageURL = doc:selectFirst(".img-wrap img"):attr("src"),
+        description = doc:selectFirst(".lead"):text(),
+        authors = { doc:select("td:contains('Author') + td"):text():gsub("[%s\t\n]+", " ")},
+        genres = map(doc:select("td:contains('Genre') + td a"), function(el) return el:text() end),
     }
-end
-    -- Parse chapters
-    -- local chapterJson = document:selectFirst("#__NEXT_DATA__"):html()
-    -- local jsonData = JSONDecode(chapterJson)
-    -- local chapters = jsonData.props.pageProps.serie.chapters
-    -- for i, jsonChapter in ipairs(chapters) do
-    --     novel:addChapter(ChapterItem {
-    --         name = jsonChapter.title,
-    --         path = "en/serie-" .. jsonData.props.pageProps.serie.serie_data.raw_id .. "/" .. jsonData.props.pageProps.serie.serie_data.slug .. "/chapter-" .. jsonChapter.order,
-    --         releaseTime = jsonChapter.created_at:sub(1, 10)
-    --     })
-    --     return novel
-    -- end
 
---- @param data table @of applied filter values [QUERY] is the search query, may be empty.
---- @return Novel[] | Array
-
-local function search(data)
-    local url = baseURL .. "api/search"
-    local response = POST(url, { text = data[QUERY] })
-    local recentNovel = JSONDecode(response)
-    local novels = {}
-    for i, datum in ipairs(recentNovel.data) do
-        local novel = {
-            name = datum.data.title,
-            cover = datum.data.image,
-            path = "en/serie-" .. datum.raw_id .. "/" .. datum.slug
+    local chapters = {}
+    for i, ch in ipairs(serie.chapters) do
+        chapters[#chapters+1] = NovelChapter {
+            title = ch.title,
+            link = "serie-" .. serie.serie_data.raw_id .. "/" .. serie.serie_data.slug .. "/chapter-" .. ch.order,
+            order = i
         }
-        table.insert(novels, novel)
     end
-
-    return novels
+    novelInfo:setChapters(chapters)
+    return novelInfo
 end
+
+--- Search function.
+local function search(data)
+    local query = data[QUERY]
+    local res = Request {
+        url = baseURL .. "api/search",
+        method = "POST",
+        headers = {
+            ["Content-Type"] = "application/json",
+            ["Referer"] = baseURL,
+            ["Origin"] = baseURL
+        },
+        body = json.encode({ text = query })
+    }
+    
+    local results = json.decode(res.body)
+    return map(results.data, function(v)
+        return Novel {
+            title = v.data.title,
+            link = "serie-" .. v.raw_id .. "/" .. v.slug,
+            imageURL = v.data.image
+        }
+    end)
+end
+
+--- Listings configuration.
+local listings = {
+        Listing("Popular Novels", true, function(data)
+            -- Retrieve filters from the data object
+            local filters = data.filters or {}
+            local order = filters.order and filters.order.value or 1  -- Default to 1 if nil
+            local sort = filters.sort and filters.sort.value or "desc"  -- Default to "desc" if nil
+            local status = filters.storyStatus and filters.storyStatus.value or "all"  -- Default to "all" if nil
+            local page = data[PAGE]
+        local url = baseURL .. "en/novel-list?orderBy=" .. order .. "&order=" .. sort .. "&filter=" .. status .. "&page=" .. page
+        local doc = GETDocument(url)
+        
+        return map(doc:select(".serie-item"), function(el)
+            return Novel {
+                title = el:select(".title-wrap a"):text():gsub(el:select(".rawtitle"):text(), ""),
+                link = shrinkURL(el:select("a"):attr("href"), KEY_NOVEL_URL),
+                imageURL = el:select("img"):attr("src")
+            }
+        end)
+    end),
+    
+  
+    Listing("Latest Novels", true, function(data)
+        local page = data[PAGE]
+        local res = Request {
+            url = baseURL .. "api/home/recent",
+            method = "POST",
+            headers = { ["Content-Type"] = "application/json" },
+            body = json.encode({ page = page })
+        }
+        
+        local results = json.decode(res.body)
+        return map(results.data, function(v)
+            return Novel {
+                title = v.serie.data.title,
+                link = "serie-" .. v.serie.raw_id .. "/" .. v.serie.slug,
+                imageURL = v.serie.data.image
+            }
+        end)
+    end)
+}
 
 return {
-    id = 10255,
-    name = "WTR-LAB",
+    id = id,
+    name = name,
     baseURL = baseURL,
-    imageURL = "https://imgur.com/a/LAE1Hnp",
-    hasSearch = true,
-    search = search,
+    imageURL = imageURL,
     listings = listings,
     getPassage = getPassage,
-    chapterType = chapterType.HTML,
     parseNovel = parseNovel,
     shrinkURL = shrinkURL,
     expandURL = expandURL,
-    searchFilters = searchFilters
+    hasSearch = hasSearch,
+    search = search,
+    searchFilters = searchFilters,
+    chapterType = ChapterType.HTML
 }
