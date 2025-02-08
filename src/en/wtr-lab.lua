@@ -1,4 +1,4 @@
--- {"id":10255,"ver":"1.0.4","libVer":"1.0.0","author":""}
+-- {"id":10255,"ver":"1.0.5","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
@@ -22,9 +22,9 @@ local hasSearch = true
 local isSearchIncrementing = true
 
 --- Filters configuration.
-local ORDER_FILTER_ID = 5
-local SORT_FILTER_ID = 6
-local STATUS_FILTER_ID = 7
+local ORDER_FILTER_ID = 2
+local SORT_FILTER_ID = 4
+local STATUS_FILTER_ID = 3
 
 --- Filters configuration.
 local searchFilters = {
@@ -73,6 +73,10 @@ local function parseNovel(novelURL)
         imageURL = doc:selectFirst(".img-wrap img"):attr("src"),
         description = doc:selectFirst(".lead"):text(),
         authors = {doc:select("td:matches(^Author$) + td a"):text()},
+        status = ({
+            Ongoing = NovelStatus.PUBLISHING,
+            Completed = NovelStatus.COMPLETED,
+        })[doc:selectFirst("td:matches(^Status$) + td"):text()],
     }
 
     local chapters = {}
