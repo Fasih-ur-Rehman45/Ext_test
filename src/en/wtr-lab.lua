@@ -1,4 +1,4 @@
--- {"id":10255,"ver":"1.0.6","libVer":"1.0.0","author":""}
+-- {"id":10255,"ver":"1.0.7","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
@@ -25,17 +25,24 @@ local isSearchIncrementing = true
 local ORDER_FILTER_ID = 2
 local SORT_FILTER_ID = 4
 local STATUS_FILTER_ID = 3
-
+local ORDER_PARM = {
+    "view",
+    "name",
+    "date",
+    "reader",
+    "chapter"
+}
+local ORDER_VALUE = {
+    "View",
+    "Name",
+    "Addition Date",
+    "Reader",
+    "Chapter"
+}
 
 --- Filters configuration.
 local searchFilters = {
-    DropdownFilter(ORDER_FILTER_ID, "Order by", {
-        "View",
-        "Name",
-        "Addition Date",
-        "Reader",
-        "Chapter"
-    }),
+    DropdownFilter(ORDER_FILTER_ID, "Order by", ORDER_VALUE),
     DropdownFilter(SORT_FILTER_ID, "Sort by", {"Descending", "Ascending"}),
     DropdownFilter(STATUS_FILTER_ID, "Status", {"All", "Ongoing", "Completed"})
 }
@@ -115,18 +122,14 @@ local function search(data)
         }
     end)
 end
---making Filter Work
-local function toLower(str)
-    return str:lower()  -- Convert the string to lowercase
-end
 --- Listings configuration.
 local listings = {
         Listing("Popular Novels", true, function(data)
             -- Retrieve filters from the data object
             local filters = data.filters or {}
-            local order = toLower(filters[ORDER_FILTER_ID] and filters[ORDER_FILTER_ID].value or "view")
-            local sort = toLower(filters[SORT_FILTER_ID] and filters[SORT_FILTER_ID].value or "descending")
-            local status = toLower(filters[STATUS_FILTER_ID] and filters[STATUS_FILTER_ID].value or "all")
+            local order = filters[ORDER_FILTER_ID] and filters[ORDER_PARM].value or "view"
+            local sort = filters[SORT_FILTER_ID] and filters[SORT_FILTER_ID].value or "descending"
+            local status = filters[STATUS_FILTER_ID] and filters[STATUS_FILTER_ID].value or "all"
             local page = data[PAGE]
             local url = baseURL .. "en/novel-list?orderBy=" .. order .. "&order=" .. sort .. "&filter=" .. status .. "&page=" .. page
             local doc = GETDocument(url)
