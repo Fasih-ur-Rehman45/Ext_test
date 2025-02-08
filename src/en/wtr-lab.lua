@@ -1,4 +1,4 @@
--- {"id":10255,"ver":"1.0.3","libVer":"1.0.0","author":""}
+-- {"id":10255,"ver":"1.0.4","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
@@ -116,12 +116,12 @@ local listings = {
         Listing("Popular Novels", true, function(data)
             -- Retrieve filters from the data object
             local filters = data.filters or {}
-            local order = filters.order and filters.order.value or 1  -- Default to 1 if nil
-            local sort = filters.sort and filters.sort.value or "desc"  -- Default to "desc" if nil
-            local status = filters.storyStatus and filters.storyStatus.value or "all"  -- Default to "all" if nil
+            local order = filters[ORDER_FILTER_ID] and filters[ORDER_FILTER_ID].value or "View"
+            local sort = filters[SORT_FILTER_ID] and filters[SORT_FILTER_ID].value or "Descending"
+            local status = filters[STATUS_FILTER_ID] and filters[STATUS_FILTER_ID].value or "All"
             local page = data[PAGE]
-        local url = baseURL .. "en/novel-list?orderBy=" .. order .. "&order=" .. sort .. "&filter=" .. status .. "&page=" .. page
-        local doc = GETDocument(url)
+            local url = baseURL .. "en/novel-list?orderBy=" .. order .. "&order=" .. sort .. "&filter=" .. status .. "&page=" .. page
+            local doc = GETDocument(url)
         
         return map(doc:select(".serie-item"), function(el)
             return Novel {
