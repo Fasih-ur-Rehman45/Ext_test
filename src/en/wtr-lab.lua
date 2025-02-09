@@ -1,4 +1,4 @@
--- {"id":10255,"ver":"1.0.13","libVer":"1.0.0","author":""}
+-- {"id":10255,"ver":"1.0.14","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
@@ -161,7 +161,7 @@ local listings = {
             if status ~= nil then
                 statusValue = FILTER_PERM[status + 1]
             end
-            local url = baseURL .. "en/novel-list?orderBy=" .. orderValue .. "&order=" .. sortValue .. "&filter=" .. statusValue .. "&page=" .. page
+            local url = baseURL .. "en/novel-list?orderBy=" .. orderValue .. "&order=" .. sortValue .. "&status=" .. statusValue .. "&page=" .. page
             local doc = GETDocument(url)
         
         return map(doc:select(".serie-item"), function(el)
