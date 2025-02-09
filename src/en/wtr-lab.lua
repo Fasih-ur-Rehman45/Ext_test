@@ -1,4 +1,4 @@
--- {"id":10255,"ver":"1.0.15","libVer":"1.0.0","author":""}
+-- {"id":10255,"ver":"1.0.16","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
@@ -109,7 +109,7 @@ local function parseNovel(novelURL)
     for i, ch in ipairs(serie.chapters) do
         chapters[#chapters+1] = NovelChapter {
             title = ch.title,
-            link = "serie-" .. serie.serie_data.raw_id .. "/" .. serie.serie_data.slug .. "/chapter-" .. ch.order,
+            link = "serie-" .. serie.serie_data.raw_id .. "/" .. serie.serie_data.slug .. "/chapter-" .. ch.order .. "?service=google",
             order = i
         }
     end
@@ -132,6 +132,7 @@ local function search(data)
     }
     
     local results = json.decode(res.body)
+
     return map(results.data, function(v)
         return Novel {
             title = v.data.title,
@@ -171,29 +172,8 @@ local listings = {
                 imageURL = el:select("img"):attr("src")
             }
         end)
-    end),
-    
-  
-    Listing("Latest Novels", true, function(data)
-        local page = data[PAGE]
-        local res = Request {
-            url = baseURL .. "api/home/recent",
-            method = "POST",
-            headers = { ["Content-Type"] = "application/json" },
-            body = json.encode({ page = page })
-        }
-        
-        local results = json.decode(res.body)
-        return map(results.data, function(v)
-            return Novel {
-                title = v.serie.data.title,
-                link = "serie-" .. v.serie.raw_id .. "/" .. v.serie.slug,
-                imageURL = v.serie.data.image
-            }
-        end)
     end)
 }
-
 return {
     id = id,
     name = name,
