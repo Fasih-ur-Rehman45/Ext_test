@@ -1,4 +1,4 @@
--- {"id":10255,"ver":"1.0.8","libVer":"1.0.0","author":""}
+-- {"id":10255,"ver":"1.0.9","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
@@ -28,17 +28,43 @@ local STATUS_FILTER_ID = 3
 
 
 --- Filters configuration.
-local searchFilters = {
-    DropdownFilter(ORDER_FILTER_ID, "Order by", {
-        "view",
-        "name",
-        "date",
-        "reader",
-        "chapter"
-    }),
-    DropdownFilter(SORT_FILTER_ID, "Sort by", {"Descending", "Ascending"}),
-    DropdownFilter(STATUS_FILTER_ID, "Status", {"All", "Ongoing", "Completed"})
+local orderFilterOptions = {
+    { display = "View", value = "view" },
+    { display = "Name", value = "name" },
+    { display = "Date", value = "date" },  -- Renamed from "Addition Date" to "Date"
+    { display = "Reader", value = "reader" },
+    { display = "Chapter", value = "chapter" }
 }
+
+-- Mapping table for sort filter options
+local sortFilterOptions = {
+    { display = "Descending", value = "descending" },
+    { display = "Ascending", value = "ascending" }
+}
+
+-- Mapping table for status filter options
+local statusFilterOptions = {
+    { display = "All", value = "all" },
+    { display = "Ongoing", value = "ongoing" },
+    { display = "Completed", value = "completed" }
+}
+
+-- Search filters
+local searchFilters = {
+    DropdownFilter(ORDER_FILTER_ID, "Order by", map(orderFilterOptions, function(opt) return opt.display end)),
+    DropdownFilter(SORT_FILTER_ID, "Sort by", map(sortFilterOptions, function(opt) return opt.display end)),
+    DropdownFilter(STATUS_FILTER_ID, "Status", map(statusFilterOptions, function(opt) return opt.display end))
+}
+
+-- Function to get the lowercase value for a filter
+local function getFilterValue(filterOptions, displayText)
+    for _, opt in ipairs(filterOptions) do
+        if opt.display == displayText then
+            return opt.value
+        end
+    end
+    return nil
+end
 
 --- URL handling functions.
 local function shrinkURL(url, type)
@@ -120,10 +146,13 @@ end
 local listings = {
         Listing("Popular Novels", true, function(data)
             -- Retrieve filters from the data object
-            local filters = data.filters or {}
-            local order = filters[ORDER_FILTER_ID] and filters[ORDER_FILTER_ID].value or "view"
-            local sort = filters[SORT_FILTER_ID] and filters[SORT_FILTER_ID].value or "descending"
-            local status = filters[STATUS_FILTER_ID] and filters[STATUS_FILTER_ID].value or "all"
+            local orderDisplay = data[ORDER_FILTER_ID] or "View"
+            local sortDisplay = data[SORT_FILTER_ID] or "Descending"
+            local statusDisplay = data[STATUS_FILTER_ID] or "All"
+            -- Convert display text to lowercase values
+            local order = getFilterValue(orderFilterOptions, orderDisplay) or "view"
+            local sort = getFilterValue(sortFilterOptions, sortDisplay) or "descending"
+            local status = getFilterValue(statusFilterOptions, statusDisplay) or "all"
             local page = data[PAGE]
             local url = baseURL .. "en/novel-list?orderBy=" .. order .. "&order=" .. sort .. "&filter=" .. status .. "&page=" .. page
             local doc = GETDocument(url)
