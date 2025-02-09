@@ -1,4 +1,4 @@
--- {"id":10255,"ver":"1.0.11","libVer":"1.0.0","author":""}
+-- {"id":10255,"ver":"1.0.12","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
@@ -21,103 +21,50 @@ local hasCloudFlare = false
 local hasSearch = true
 local isSearchIncrementing = true
 
+--- Filters configuration.
+local ORDER_FILTER_ID = 2
+local ORDER_PERM = {
+    "view",
+    "title",
+    "date",
+    "reader",
+    "chapter"
+}
+local ORDER_VALUE = {
+    "View",
+    "Name",
+    "Addition Date",
+    "Reader",
+    "Chapter"
+}
+local SORT_FILTER_ID = 4
+local SORT_PERM = {
+    "desc",
+    "asc"
+}
+local SORT_VALUE = {
+    "Descending",
+    "Ascending"
+}
+local STATUS_FILTER_ID = 3
+local FILTER_VALUE = {
+    "All",
+    "Ongoing",
+    "Completed"
+}
+local FILTER_PERM = {
+    "all",
+    "ongoing",
+    "completed"
+}
 
 --- Filters configuration.
-local FILTER_IDS = {
-    ORDER = 2,
-    SORT = 3,
-    STATUS = 4
-}
-
-local filters = {
-    [FILTER_IDS.ORDER] = {
-        param = "orderBy",
-        options = {
-            {display = "View", value = "view"},
-            {display = "Name", value = "name"},
-            {display = "Date", value = "date"},
-            {display = "Reader", value = "reader"},
-            {display = "Chapter", value = "chapter"}
-        }
-    },
-    [FILTER_IDS.SORT] = {
-        param = "order",
-        options = {
-            {display = "Descending", value = "desc"},
-            {display = "Ascending", value = "asc"}
-        }
-    },
-    [FILTER_IDS.STATUS] = {
-        param = "filter",
-        options = {
-            {display = "All", value = "all"},
-            {display = "Ongoing", value = "ongoing"},
-            {display = "Completed", value = "completed"}
-        }
-    }
-}
-
--- Search filters
 local searchFilters = {
-    DropdownFilter(
-        FILTER_IDS.ORDER,
-        "Order by",
-        map(filters[FILTER_IDS.ORDER].options, function(opt) return opt.display end)
-    ),
-    DropdownFilter(
-        FILTER_IDS.SORT,
-        "Sort by",
-        map(filters[FILTER_IDS.SORT].options, function(opt) return opt.display end)
-    ),
-    DropdownFilter(
-        FILTER_IDS.STATUS,
-        "Status",
-        map(filters[FILTER_IDS.STATUS].options, function(opt) return opt.display end)
-    )
+    DropdownFilter(ORDER_FILTER_ID, "Order by", ORDER_VALUE),
+    DropdownFilter(SORT_FILTER_ID, "Sort by", SORT_VALUE),
+    DropdownFilter(STATUS_FILTER_ID, "Status", FILTER_VALUE)
 }
 
-local function findValue(options, display)
-    for _, opt in ipairs(options) do
-        if opt.display == display then
-            return opt.value
-        end
-    end
-    return nil
-end
-
-local function buildListingURL(data)
-    local params = {}
-    
-    -- Add all active filters
-    for filterId, filterConfig in pairs(filters) do
-        local selectedDisplay = data[filterId]
-        if selectedDisplay then
-            local value = findValue(filterConfig.options, selectedDisplay)
-            if value then
-                table.insert(params, filterConfig.param .. "=" .. value)
-            end
-        end
-    end
-    
-    -- Add pagination
-    table.insert(params, "page=" .. (data[PAGE] or 1))
-    return baseURL .. "en/novel-list?" .. table.concat(params, "&")
-end
-
-
-local listings = {
-    Listing("Popular Novels", true, function(data)
-        local url = buildListingURL(data)
-        local doc = GETDocument(url)
-        return map(doc:select(".serie-item"), function(el)
-            return Novel {
-                title = el:select(".title-wrap a"):text(),
-                link = shrinkURL(el:select("a"):attr("href"), KEY_NOVEL_URL),
-                imageURL = el:select("img"):attr("src")
-            }
-        end)
-    end)
-}
 --- URL handling functions.
 local function shrinkURL(url, type)
     return url:gsub(baseURL, ""):gsub("^en", "")
@@ -195,19 +142,25 @@ local function search(data)
 end
 
 --- Listings configuration.
-    local listings = {
+local listings = {
         Listing("Popular Novels", true, function(data)
-            local url = buildListingURL(data, data[PAGE])
+            -- Retrieve filters from the data object
+            local filters = data.filters or {}
+            local order = filters[ORDER_FILTER_ID] and filters[ORDER_FILTER_ID].value or "view"
+            local sort = filters[SORT_FILTER_ID] and filters[SORT_FILTER_ID].value or "descending"
+            local status = filters[STATUS_FILTER_ID] and filters[STATUS_FILTER_ID].value or "all"
+            local page = data[PAGE]
+            local url = baseURL .. "en/novel-list?orderBy=" .. order .. "&order=" .. sort .. "&filter=" .. status .. "&page=" .. page
             local doc = GETDocument(url)
-            
-            return map(doc:select(".serie-item"), function(el)
-                return Novel {
-                    title = el:select(".title-wrap a"):text():gsub(el:select(".rawtitle"):text(), ""),
-                    link = shrinkURL(el:select("a"):attr("href"), KEY_NOVEL_URL),
-                    imageURL = el:select("img"):attr("src")
-                }
-            end)
-        end),
+        
+        return map(doc:select(".serie-item"), function(el)
+            return Novel {
+                title = el:select(".title-wrap a"):text():gsub(el:select(".rawtitle"):text(), ""),
+                link = shrinkURL(el:select("a"):attr("href"), KEY_NOVEL_URL),
+                imageURL = el:select("img"):attr("src")
+            }
+        end)
+    end),
     
   
     Listing("Latest Novels", true, function(data)
