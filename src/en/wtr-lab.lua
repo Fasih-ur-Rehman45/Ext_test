@@ -1,4 +1,4 @@
--- {"id":10255,"ver":"1.0.10","libVer":"1.0.0","author":""}
+-- {"id":10255,"ver":"1.0.11","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
@@ -23,67 +23,101 @@ local isSearchIncrementing = true
 
 
 --- Filters configuration.
+local FILTER_IDS = {
+    ORDER = 2,
+    SORT = 3,
+    STATUS = 4
+}
+
 local filters = {
-    order = {
-        value = "orderBy",
+    [FILTER_IDS.ORDER] = {
+        param = "orderBy",
         options = {
-            { display = "View", value = "view" },
-            { display = "Name", value = "name" },
-            { display = "Date", value = "date" },
-            { display = "Reader", value = "reader" },
-            { display = "Chapter", value = "chapter" }
+            {display = "View", value = "view"},
+            {display = "Name", value = "name"},
+            {display = "Date", value = "date"},
+            {display = "Reader", value = "reader"},
+            {display = "Chapter", value = "chapter"}
         }
     },
-    sort = {
-        value = "order",
+    [FILTER_IDS.SORT] = {
+        param = "order",
         options = {
-            { display = "Descending", value = "descending" },
-            { display = "Ascending", value = "ascending" }
+            {display = "Descending", value = "desc"},
+            {display = "Ascending", value = "asc"}
         }
     },
-    status = {
-        value = "filter",
+    [FILTER_IDS.STATUS] = {
+        param = "filter",
         options = {
-            { display = "All", value = "all" },
-            { display = "Ongoing", value = "ongoing" },
-            { display = "Completed", value = "completed" }
+            {display = "All", value = "all"},
+            {display = "Ongoing", value = "ongoing"},
+            {display = "Completed", value = "completed"}
         }
     }
 }
 
 -- Search filters
 local searchFilters = {
-    DropdownFilter(2, "Order by", map(filters.order.options, function(opt) return opt.display end)),
-    DropdownFilter(3, "Sort by", map(filters.sort.options, function(opt) return opt.display end)),
-    DropdownFilter(4, "Status", map(filters.status.options, function(opt) return opt.display end))
+    DropdownFilter(
+        FILTER_IDS.ORDER,
+        "Order by",
+        map(filters[FILTER_IDS.ORDER].options, function(opt) return opt.display end)
+    ),
+    DropdownFilter(
+        FILTER_IDS.SORT,
+        "Sort by",
+        map(filters[FILTER_IDS.SORT].options, function(opt) return opt.display end)
+    ),
+    DropdownFilter(
+        FILTER_IDS.STATUS,
+        "Status",
+        map(filters[FILTER_IDS.STATUS].options, function(opt) return opt.display end)
+    )
 }
 
--- Function to get the lowercase value for a filter
-local function getFilterValue(filterType, displayText)
-    local filterOptions = filters[filterType].options
-    for _, opt in ipairs(filterOptions) do
-        if opt.display == displayText then
+local function findValue(options, display)
+    for _, opt in ipairs(options) do
+        if opt.display == display then
             return opt.value
         end
     end
-    return filterOptions[1].value
+    return nil
 end
 
-local function buildListingURL(data, page)
-    local url = baseURL .. "en/novel-list?"
+local function buildListingURL(data)
+    local params = {}
     
-    -- Get filter values from data
-    local orderDisplay = data[1] or filters.order.options[1].display
-    local sortDisplay = data[2] or filters.sort.options[1].display
-    local statusDisplay = data[3] or filters.status.options[1].display
+    -- Add all active filters
+    for filterId, filterConfig in pairs(filters) do
+        local selectedDisplay = data[filterId]
+        if selectedDisplay then
+            local value = findValue(filterConfig.options, selectedDisplay)
+            if value then
+                table.insert(params, filterConfig.param .. "=" .. value)
+            end
+        end
+    end
     
-    url = url .. filters.order.value .. "=" .. getFilterValue("order", orderDisplay)
-    url = url .. "&" .. filters.sort.value .. "=" .. getFilterValue("sort", sortDisplay)
-    url = url .. "&" .. filters.status.value .. "=" .. getFilterValue("status", statusDisplay)
-    url = url .. "&page=" .. (page or 1)
-    return url
+    -- Add pagination
+    table.insert(params, "page=" .. (data[PAGE] or 1))
+    return baseURL .. "en/novel-list?" .. table.concat(params, "&")
 end
 
+
+local listings = {
+    Listing("Popular Novels", true, function(data)
+        local url = buildListingURL(data)
+        local doc = GETDocument(url)
+        return map(doc:select(".serie-item"), function(el)
+            return Novel {
+                title = el:select(".title-wrap a"):text(),
+                link = shrinkURL(el:select("a"):attr("href"), KEY_NOVEL_URL),
+                imageURL = el:select("img"):attr("src")
+            }
+        end)
+    end)
+}
 --- URL handling functions.
 local function shrinkURL(url, type)
     return url:gsub(baseURL, ""):gsub("^en", "")
