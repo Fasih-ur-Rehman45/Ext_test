@@ -1,4 +1,4 @@
--- {"id":10255,"ver":"1.0.14","libVer":"1.0.0","author":""}
+-- {"id":10255,"ver":"1.0.15","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
@@ -25,7 +25,7 @@ local isSearchIncrementing = true
 local ORDER_FILTER_ID = 2
 local ORDER_PERM = {
     "view",
-    "title",
+    "name",
     "date",
     "reader",
     "chapter"
