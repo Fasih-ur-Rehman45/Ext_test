@@ -1,12 +1,9 @@
--- {"id":10255,"ver":"1.0.23","libVer":"1.0.0","author":""}
+-- {"id":10255,"ver":"1.0.24","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
 --- Identification number of the extension.
 local id = 10255  -- Update with your extension ID
-
---- Name of extension to display to the user.
-local name = "WTR-LAB"
 
 --- Base URL of the extension.
 local baseURL = "https://wtr-lab.com/"
@@ -17,7 +14,7 @@ local imageURL = "https://i.imgur.com/ObQtFVW.png"  -- Update correct path
 --- Cloudflare protection status.
 local hasCloudFlare = false
 
---textFun
+---@param v Element
 local text = function(v)
     return v:text()
 end
@@ -104,7 +101,7 @@ local function parseNovel(novelURL)
         imageURL = doc:selectFirst(".img-wrap img"):attr("src"),
         description = doc:selectFirst(".lead"):text(),
         authors = {doc:selectFirst("td:matches(^Author$) + td a"):text()},
-        genres = map(doc:select("td:matches(^Genre$) + td a"), text),
+        genres = map(doc:select("td:matches(^Genre$) + td a"),text),
         status = ({
             Ongoing = NovelStatus.PUBLISHING,
             Completed = NovelStatus.COMPLETED,
@@ -187,7 +184,7 @@ local listings = {
 }
 return {
     id = id,
-    name = name,
+    name = "Wtr-Lab",
     baseURL = baseURL,
     imageURL = imageURL,
     listings = listings,
