@@ -1,4 +1,4 @@
--- {"id":10255,"ver":"1.0.16","libVer":"1.0.0","author":""}
+-- {"id":10255,"ver":"1.0.17","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
@@ -116,24 +116,17 @@ local function parseNovel(novelURL)
     novelInfo:setChapters(chapters)
     return novelInfo
 end
-
 --- Search function.
 local function search(data)
     local query = data[QUERY]
-    local res = Request {
-        url = baseURL .. "api/search",
-        method = "POST",
-        headers = {
-            ["Content-Type"] = "application/json",
-            ["Referer"] = baseURL,
-            ["Origin"] = baseURL
-        },
-        body = json.encode({ text = query })
-    }
-    
-    local results = json.decode(res.body)
-
-    return map(results.data, function(v)
+    local page = data[PAGE]
+    -- Use json.POST to send a POST request with JSON data
+    local doc = GETDocument(baseURL .. "novel-finder?text=" .. query .. "&page=" .. page)
+    local script = doc:selectFirst("#__NEXT_DATA__"):html()
+    local data = json.decode(script)
+    local serie = data.props.pageProps.series
+    -- Map the results to Novel objects
+    return map(serie, function(v)
         return Novel {
             title = v.data.title,
             link = "serie-" .. v.raw_id .. "/" .. v.slug,
