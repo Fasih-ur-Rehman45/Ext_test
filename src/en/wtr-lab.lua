@@ -1,4 +1,4 @@
--- {"id":10255,"ver":"1.0.17","libVer":"1.0.0","author":""}
+-- {"id":10255,"ver":"1.0.18","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
@@ -158,6 +158,18 @@ local listings = {
             local url = baseURL .. "en/novel-list?orderBy=" .. orderValue .. "&order=" .. sortValue .. "&status=" .. statusValue .. "&page=" .. page
             local doc = GETDocument(url)
         
+        return map(doc:select(".serie-item"), function(el)
+            return Novel {
+                title = el:select(".title-wrap a"):text():gsub(el:select(".rawtitle"):text(), ""),
+                link = shrinkURL(el:select("a"):attr("href"), KEY_NOVEL_URL),
+                imageURL = el:select("img"):attr("src")
+            }
+        end)
+    end),
+        Listing("Latest Novels", true, function(data)
+        local page = data[PAGE]
+        local url = baseURL .. "en/trending?page=" .. page
+        local doc = GETDocument(url)
         return map(doc:select(".serie-item"), function(el)
             return Novel {
                 title = el:select(".title-wrap a"):text():gsub(el:select(".rawtitle"):text(), ""),
