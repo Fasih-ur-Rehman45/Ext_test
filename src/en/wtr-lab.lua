@@ -1,4 +1,4 @@
--- {"id":10255,"ver":"1.0.22","libVer":"1.0.0","author":""}
+-- {"id":10255,"ver":"1.0.23","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
@@ -16,6 +16,11 @@ local imageURL = "https://i.imgur.com/ObQtFVW.png"  -- Update correct path
 
 --- Cloudflare protection status.
 local hasCloudFlare = false
+
+--textFun
+local text = function(v)
+    return v:text()
+end
 
 --- Search configuration.
 local hasSearch = true
@@ -99,12 +104,8 @@ local function parseNovel(novelURL)
         imageURL = doc:selectFirst(".img-wrap img"):attr("src"),
         description = doc:selectFirst(".lead"):text(),
         authors = {doc:selectFirst("td:matches(^Author$) + td a"):text()},
-        genres = map(doc:select("td:matches(^Genre$) + td a"), function(genre)
-            return {
-                name = genre:text(),
-                url = genre:attr("href")
-            }
-        end),
+        genres = map(doc:select("td:matches(^Genre$) + td a"), text),
+        print("Genres: ", doc:select("td:matches(^Genre$) + td a"), text),
         status = ({
             Ongoing = NovelStatus.PUBLISHING,
             Completed = NovelStatus.COMPLETED,
