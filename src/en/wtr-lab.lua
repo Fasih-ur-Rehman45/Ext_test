@@ -1,9 +1,9 @@
--- {"id":10255,"ver":"1.0.24","libVer":"1.0.0","author":""}
+-- {"id":10256,"ver":"1.0.25","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
 --- Identification number of the extension.
-local id = 10255  -- Update with your extension ID
+local id = 10256  -- Update with your extension ID
 
 --- Base URL of the extension.
 local baseURL = "https://wtr-lab.com/"
