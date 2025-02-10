@@ -1,4 +1,4 @@
--- {"id":10255,"ver":"1.0.19","libVer":"1.0.0","author":""}
+-- {"id":10255,"ver":"1.0.20","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
@@ -101,7 +101,7 @@ local function parseNovel(novelURL)
         authors = {doc:selectFirst("td:matches(^Author$) + td a"):text()},
         genres = map(doc:select("td:matches(^Genre$) + td a"), function(g)
             return {
-                name = g:text(),
+                name = g:text():trim(),
                 url = g:attr("href")
             }
         end),
