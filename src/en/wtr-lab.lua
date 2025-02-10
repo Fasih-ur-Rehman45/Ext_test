@@ -105,7 +105,6 @@ local function parseNovel(novelURL)
         description = doc:selectFirst(".lead"):text(),
         authors = {doc:selectFirst("td:matches(^Author$) + td a"):text()},
         genres = map(doc:select("td:matches(^Genre$) + td a"), text),
-        print("Genres: ", doc:select("td:matches(^Genre$) + td a"), text),
         status = ({
             Ongoing = NovelStatus.PUBLISHING,
             Completed = NovelStatus.COMPLETED,
