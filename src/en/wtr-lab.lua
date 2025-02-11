@@ -1,4 +1,4 @@
--- {"id":10256,"ver":"1.0.25","libVer":"1.0.0","author":""}
+-- {"id":10256,"ver":"1.0.26","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
@@ -107,13 +107,13 @@ local function parseNovel(novelURL)
             Completed = NovelStatus.COMPLETED,
         })[doc:selectFirst("td:matches(^Status$) + td"):text()],
     }
-
     local chapters = {}
     for i, ch in ipairs(serie.chapters) do
         chapters[#chapters+1] = NovelChapter {
+            order = i,
             title = ch.title,
-            link = "serie-" .. serie.serie_data.raw_id .. "/" .. serie.serie_data.slug .. "/chapter-" .. ch.order .. "?service=google",
-            order = i
+            link = "serie-" .. serie.serie_data.raw_id .. "/" .. serie.serie_data.slug .. "/chapter-" .. ch.order .. "?service=google"
+            
         }
     end
     novelInfo:setChapters(chapters)
