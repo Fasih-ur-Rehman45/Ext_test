@@ -1,4 +1,4 @@
--- {"id":10256,"ver":"1.0.27","libVer":"1.0.0","author":""}
+-- {"id":10256,"ver":"1.0.28","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
@@ -81,7 +81,7 @@ end
 local function getPassage(chapterURL)
     local url = expandURL(chapterURL, KEY_CHAPTER_URL)
     local doc = GETDocument(url)
-    local script = doc:selectFirst("script#__NEXT_DATA__"):html()
+    local script = doc:selectFirst("#__NEXT_DATA__"):html()
     local data = json.decode(script)
     local content = data.props.pageProps.serie.chapter_data.data.body
     local html = table.concat(map(content, function(v) return "<p>" .. v .. "</p>" end))
@@ -112,6 +112,9 @@ local function parseNovel(novelURL)
     local script = doc:selectFirst("#__NEXT_DATA__"):html()
     local data = json.decode(script)
     local serie = data.props.pageProps.serie
+    local chaplist = baseURL .. 'api/chapters' .. "/" .. serie.serie_data.raw_id.."?start=1&end=32000"
+    local chapdoc = GETDocument(chaplist)
+    local chapterData = json.decode(chapdoc:selectFirst("body"):text())
 
     local novelInfo = NovelInfo {
         title = doc:selectFirst("h1.text-uppercase"):text(),
@@ -125,7 +128,7 @@ local function parseNovel(novelURL)
         })[doc:selectFirst("td:matches(^Status$) + td"):text()],
     }
     local chapters = {}
-    for i, ch in ipairs(serie.chapters) do
+    for i, ch in ipairs(chapterData.chapters) do
         chapters[#chapters+1] = NovelChapter {
             order = ch.order or i,
             title = ch.title,
@@ -139,7 +142,6 @@ end
 local function search(data)
     local query = data[QUERY]
     local page = data[PAGE]
-    -- Use json.POST to send a POST request with JSON data
     local doc = GETDocument(baseURL .. "novel-finder?text=" .. query .. "&page=" .. page)
     local script = doc:selectFirst("#__NEXT_DATA__"):html()
     local data = json.decode(script)
@@ -176,7 +178,6 @@ local listings = {
             end
             local url = baseURL .. "en/novel-list?orderBy=" .. orderValue .. "&order=" .. sortValue .. "&status=" .. statusValue .. "&page=" .. page
             local doc = GETDocument(url)
-        
         return map(doc:select(".serie-item"), function(el)
             return Novel {
                 title = el:select(".title-wrap a"):text():gsub(el:select(".rawtitle"):text(), ""),
