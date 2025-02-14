@@ -1,4 +1,4 @@
--- {"id":10256,"ver":"1.0.28","libVer":"1.0.0","author":""}
+-- {"id":10256,"ver":"1.0.29","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
@@ -112,7 +112,8 @@ local function parseNovel(novelURL)
     local script = doc:selectFirst("#__NEXT_DATA__"):html()
     local data = json.decode(script)
     local serie = data.props.pageProps.serie
-    local chaplist = baseURL .. 'api/chapters' .. "/" .. serie.serie_data.raw_id.."?start=1&end=32000"
+    local endNum = serie.serie_data.chapter_count
+    local chaplist = baseURL .. 'api/chapters' .. "/" .. serie.serie_data.raw_id.."?start=1&end=" .. endNum
     local chapdoc = GETDocument(chaplist)
     local chapterData = json.decode(chapdoc:selectFirst("body"):text())
 
