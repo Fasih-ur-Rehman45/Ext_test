@@ -1,2 +1,4 @@
 _doc.lua
 extension-tester.jar
+dev-setup.sh
+test-server.sh
