@@ -1,4 +1,4 @@
--- {"ver":"2.9.0","author":"TechnoJo4","dep":["url"]}
+-- {"ver":"2.9.1","author":"TechnoJo4","dep":["url"]}
 
 local encode = Require("url").encode
 local text = function(v)
@@ -31,6 +31,7 @@ local defaults = {
 	ajaxFormDataAttr = "data-post",
 	ajaxFormDataUrl = "/wp-admin/admin-ajax.php",
 	ajaxSeriesUrl = "ajax/chapters/",
+	isSearchIncrementing = true,
 
 	--- Some sites require custom CSS to exist, such as RTL support
 	customStyle = "",
@@ -125,10 +126,9 @@ end
 function defaults:getPassage(url)
 	local htmlElement = GETDocument(self.expandURL(url)):selectFirst("div.c-blog-post")
 	local title = htmlElement:selectFirst("ol.breadcrumb li.active"):text()
-	htmlElement = htmlElement:selectFirst("div.text-left") or htmlElement:selectFirst("div.text-right")
-
-	-- Chapter title inserted before chapter text.
-		htmlElement:prepend("<h1>" .. title .. "</h1>")
+	htmlElement = htmlElement:selectFirst("div.text-left")
+	-- Chapter title inserted before chapter text
+	htmlElement:prepend("<h1>" .. title .. "</h1>");
 
 	-- Remove/modify unwanted HTML elements to get a clean webpage.
 	htmlElement:select("div.lnbad-tag"):remove() -- LightNovelBastion text size
@@ -340,7 +340,6 @@ return function(baseURL, _self)
 		end)) -- 6
 	}
 
-	_self["isSearchIncrementing"] = true
 	if _self.searchHasOper then
 		keyID = keyID + 1
 		_self.searchOperId = keyID
