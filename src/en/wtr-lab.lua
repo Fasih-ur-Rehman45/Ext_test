@@ -1,4 +1,4 @@
--- {"id":10256,"ver":"1.0.30","libVer":"1.0.0","author":""}
+-- {"id":10256,"ver":"1.0.31","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
@@ -119,7 +119,7 @@ local function parseNovel(novelURL)
 
     local novelInfo = NovelInfo {
         title = doc:selectFirst("h1.text-uppercase"):text(),
-        imageURL = doc:selectFirst(".img-wrap img"):attr("src"),
+        imageURL = doc:selectFirst("div.image-wrap img"):attr("src"),
         description = doc:selectFirst(".description"):text(),
         authors = {doc:selectFirst("td:matches(^Author$) + td a"):text()},
         genres = map(doc:select("td:matches(^Genre$) + td a"),text),
