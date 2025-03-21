@@ -144,18 +144,18 @@
       "lang": "en",
       "ver": "1.0.32",
       "libVer": "1.0.0",
-      "md5": "48c1aff69b0c22f7699e0e7cafd902678eb29a783c3a3997705d0ab3eaa7d275",
+      "md5": "8198259700780ed0ac2ef1528f2000bef93df7832be1f3806dc8f1266b723ecc",
       "type": "LuaScript"
     },
     {
-      "id": 1339243358,
+      "id": 620191,
       "name": "MVLEMPYR",
       "fileName": "mvlempyr",
       "imageURL": "https://assets.mvlempyr.com/images/asset/LogoMage.webp",
       "lang": "en",
-      "ver": "1.0.3",
-      "libVer": "1.0.3",
-      "md5": "5bda295495967ff3ae55f14a98400abccdc0e608ee930dd4944217665b8f5373",
+      "ver": "1.0.1",
+      "libVer": "1.0.6",
+      "md5": "b7015b0d595d090d0876c878e5439ace95ca250f93f36ece560883f8d28ad06c",
       "type": "LuaScript"
     }
   ],

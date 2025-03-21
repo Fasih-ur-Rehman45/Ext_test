@@ -110,7 +110,7 @@ local function parseNovel(novelURL)
     local url = expandURL(novelURL, KEY_NOVEL_URL)
     local doc = GETDocument(url)
     local alertElement = doc:selectFirst("div.alert.alert-warning")
-    local isReleased = true -- Assume the source is released by default
+    local isReleased = true -- Default source is released
     if alertElement and alertElement:text():find("This source is not released yet.") then
         isReleased = false -- Mark the source as unreleased if the alert is found
     end
