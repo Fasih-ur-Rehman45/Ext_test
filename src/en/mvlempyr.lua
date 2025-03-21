@@ -1,4 +1,4 @@
--- {"id":620191,"ver":"1.0.1","libVer":"1.0.6","author":""}
+-- {"id":620191,"ver":"1.0.1","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
@@ -31,7 +31,10 @@ local function getPassage(chapterURL)
 	--- Chapter page, extract info from it.
 	local document = GETDocument(url)
     local htmlElement = document:selectFirst("#chapter")
-    return pageOfElem(htmlElement, true)
+    local title = document:selectFirst(".ct-headline.ChapterName .ct-span"):text()
+    local ht = "<h1>" .. title .. "</h1>"
+    ht = ht .. "<br><br>" .. htmlElement
+    return pageOfElem(Document(ht), true)
 end
 
 --- @param novelURL string shrunken novel url.
