@@ -1,4 +1,4 @@
--- {"id":620191,"ver":"1.0.1","libVer":"1.0.0","author":""}
+-- {"id":620191,"ver":"1.0.2","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 local bigint = Require("bigint")
@@ -72,7 +72,7 @@ local function parseNovel(novelURL)
     img = img and img:attr("src") or imageURL
     local code = document:selectFirst("#novel-code"):text()
     local headers = HeadersBuilder():add("Origin", "https://www.mvlempyr.com"):build()
-    local chapter_data = json.GET("https://chap.mvlempyr.net/wp-json/wp/v2/posts?tags=" .. calculateTagId(code) .. "&per_page=500&page=1", headers)
+    local chapter_data = json.GET("https://chap.mvlempyr.space/wp-json/wp/v2/posts?tags=" .. calculateTagId(code) .. "&per_page=500&page=1", headers)
     local chapters = {}
     for i, v in next, chapter_data do
         table.insert(chapters, NovelChapter {
