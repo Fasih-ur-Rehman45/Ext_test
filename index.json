@@ -36,6 +36,13 @@
       "website": ""
     },
     {
+      "id": 320006131,
+      "name": "Emily empyreuma",
+      "desc": "Worked on bigint",
+      "imageURL": "",
+      "website": ""
+    },
+    {
       "id": -931466336,
       "name": "JFronny",
       "desc": "Worked on XenForo",
@@ -93,6 +100,12 @@
       "ver": "1.0.5",
       "url": null,
       "hash": "99e92b56c773f2c567384bbb60962b612634915f328577953193cc70cc6e31c1"
+    },
+    {
+      "name": "bigint",
+      "ver": "1.0.0",
+      "url": null,
+      "hash": "03b457a591275e1392debffd7c898783fe0b83ae856007d95ccbfae084ef863f"
     },
     {
       "name": "dkjson",
@@ -155,7 +168,7 @@
       "lang": "en",
       "ver": "1.0.1",
       "libVer": "1.0.0",
-      "md5": "9291ce5b59db28e38da6ac546618e848a1d9520bdb490e451dd89bd8fc1f1155",
+      "md5": "67cb34f50fedefa7636f9fdd93c170c210ade7cc985bf255d193ede0fbe8a7c5",
       "type": "LuaScript"
     }
   ],
