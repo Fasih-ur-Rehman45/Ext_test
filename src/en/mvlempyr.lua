@@ -1,6 +1,7 @@
 -- {"id":620191,"ver":"1.0.1","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
+local bigint = Require("bigint")
 
 --- Identification number of the extension.
 local id = 620191
@@ -27,16 +28,36 @@ local startIndex = 1
 --- @param chapterURL string The chapters shrunken URL.
 --- @return string Strings @of chapter
 local function getPassage(chapterURL)
-	local url = expandURL(chapterURL)
+	-- Thanks to bigr4nd for figuring out that somehow .space domain bypasses cloudflare
+    local url = expandURL(chapterURL):gsub("(%w+://[^/]+)%.net", "%1.space")
 	--- Chapter page, extract info from it.
 	local document = GETDocument(url)
     local htmlElement = document:selectFirst("#chapter")
     local title = document:selectFirst(".ct-headline.ChapterName .ct-span"):text()
     local ht = "<h1>" .. title .. "</h1>"
-    ht = ht .. "<br><br>" .. htmlElement
-    return pageOfElem(Document(ht), true)
+    return pageOfElem(htmlElement, true)
 end
 
+local function calculateTagId(novel_code)
+    local t = bigint.new("1999999997")
+    local c = bigint.modulus(bigint.new("7"), t);
+    local d = tonumber(novel_code);
+    local u = bigint.new(1);
+    while d > 0 do
+        -- print(bigint.unserialize(t, "string"), bigint.unserialize(c, "string"), d, bigint.unserialize(u, "string"))
+        if (d % 2) == 1 then
+            u = bigint.modulus((u * c), t)
+        end
+        c = bigint.modulus((c * c), t);
+        d = math.floor(d/2);
+    end
+    return bigint.unserialize(u, "string")
+end
+
+--- Load info on a novel.
+---
+--- Required.
+---
 --- @param novelURL string shrunken novel url.
 --- @return NovelInfo
 local function parseNovel(novelURL)
@@ -47,11 +68,11 @@ local function parseNovel(novelURL)
     map(document:select(".synopsis p"), function(p)
         desc = desc .. '\n' .. p:text()
     end)
-    local img = document:selectFirst("img.novel-image2"):attr("src") or imageURL
+    local img = document:selectFirst("img.novel-image2")
+    img = img and img:attr("src") or imageURL
     local code = document:selectFirst("#novel-code"):text()
     local headers = HeadersBuilder():add("Origin", "https://www.mvlempyr.com"):build()
-    local tags = json.GET("https://chp.mvlempyr.net/wp-json/wp/v2/tags?slug=" .. code, headers)
-    local chapter_data = json.GET("https://chp.mvlempyr.net/wp-json/wp/v2/posts?tags=" .. tags[1].id .. "&per_page=500&page=1", headers)
+    local chapter_data = json.GET("https://chap.mvlempyr.net/wp-json/wp/v2/posts?tags=" .. calculateTagId(code) .. "&per_page=500&page=1", headers)
     local chapters = {}
     for i, v in next, chapter_data do
         table.insert(chapters, NovelChapter {
@@ -72,7 +93,7 @@ local listing_page_parm
 local function getListing(data)
     local document = GETDocument("https://www.mvlempyr.com/novels" .. (listing_page_parm and (listing_page_parm .. data[PAGE]) or ""))
     if not listing_page_parm then
-        listing_page_parm = document:selectFirst("a.painationbutton.w--current,a.w-pagination-next")
+        listing_page_parm = document:selectFirst(".g-tpage a.painationbutton.w--current, .g-tpage a.w-pagination-next")
         if not listing_page_parm then
             error(document)
         end
@@ -85,24 +106,39 @@ local function getListing(data)
             error("Failed to find listing match")
         end
     end
-    return map(document:select("div.searchlist[role=\"listitem\"]"), function(v)
+    return map(document:select(".g-tpage div.searchlist[role=\"listitem\"] .novelcolumn .novelcolumimage a"), function(v)
         return Novel {
-            title = v:selectFirst("h2"):text(),
-            link = "https://www.mvlempyr.com/" ..v:selectFirst("a"):attr("href"),
+            title = v:attr("title"),
+            link = "https://www.mvlempyr.com/" .. v:attr("href"),
             imageURL = v:selectFirst("img"):attr("src")
         }
     end)
 end
 
+local search_page_parm
 local function search(data)
     local query = data[QUERY]
-    local document = GETDocument("https://www.mvlempyr.com/advance-search")
-    return mapNotNil(document:select("div.searchitem"), function(v)
-        local name = v:selectFirst(".novelsearchname"):text()
+    local document = GETDocument("https://www.mvlempyr.com/advance-search" .. (search_page_parm and (search_page_parm .. data[PAGE]) or ""))
+    if not search_page_parm then
+        search_page_parm = document:selectFirst("[role=\"navigation\"]:has(.paginationbuttonwrapper) [aria-label=\"Next Page\"]")
+        if not search_page_parm then
+            error(document)
+        end
+        search_page_parm = search_page_parm:attr("href")
+        if not search_page_parm then
+            error("Failed to find search href")
+        end
+        search_page_parm = search_page_parm:match("%?[^=]+=")
+        if not search_page_parm then
+            error("Failed to find search match")
+        end
+    end
+    return mapNotNil(document:select(".novelcolumn"), function(v)
+        local name = v:selectFirst(".novelcolumcontent h2"):text()
         if not name:lower():match(query) then
             return nil
         end
-        return NovelInfo {
+        return Novel {
             title = name,
             link = "https://www.mvlempyr.com/" ..v:selectFirst("a"):attr("href"),
             imageURL = imageURL
@@ -124,10 +160,10 @@ return {
 	shrinkURL = shrinkURL,
 	expandURL = expandURL,
     hasSearch = true,
-    isSearchIncrementing = false,
+    isSearchIncrementing = true,
     hasCloudFlare = true,
     search = search,
 	imageURL = imageURL,
-	chapterType = ChapterType.HTML,
-    startIndex = startIndex,
+	chapterType = chapterType,
+	startIndex = startIndex,
 }
