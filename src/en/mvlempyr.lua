@@ -75,7 +75,7 @@ local function parseNovel(novelURL)
     local chapters = {}
     local page = 1
     repeat
-        local chapter_data = json.GET("https://chap.mvlempyr.space/wp-json/wp/v2/posts?tags=" .. calculateTagId(novel_code) .. "&per_page=500&page=" .. page, headers)
+        local chapter_data = json.GET("https://chap.mvlempyr.space/wp-json/wp/v2/posts?tags=" .. calculateTagId(code) .. "&per_page=500&page=" .. page, headers)
         for i, v in next, chapter_data do
             table.insert(chapters, NovelChapter {
                 order = v.acf.chapter_number,
