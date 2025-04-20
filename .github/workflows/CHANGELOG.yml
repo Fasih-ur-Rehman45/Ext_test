@@ -1,0 +1,39 @@
+name: Changelog
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [closed]
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate Changelog
+        uses: ardalanamini/auto-changelog@v4.0.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          output: CHANGELOG.md
+          template: keepachangelog
+          commit-style: conventional
+          breaking-pattern: '^break|BREAKING CHANGE'
+          categories: |
+            feat: Features
+            fix: Bug Fixes
+            perf: Performance
+            refactor: Refactoring
+            docs: Documentation
+
+      - name: Commit changes
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git add CHANGELOG.md
+          git commit -m "chore: update changelog [skip ci]" || echo "No changes to commit"
+          git push
