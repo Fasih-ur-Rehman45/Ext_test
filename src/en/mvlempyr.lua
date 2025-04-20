@@ -1,4 +1,4 @@
--- {"id":620191,"ver":"1.0.2","libVer":"1.0.0","author":""}
+-- {"id":620191,"ver":"1.0.3","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 local bigint = Require("bigint")
@@ -28,8 +28,8 @@ local startIndex = 1
 --- @param chapterURL string The chapters shrunken URL.
 --- @return string Strings @of chapter
 local function getPassage(chapterURL)
-	-- Thanks to bigr4nd for figuring out that somehow .space domain bypasses cloudflare
-    local url = expandURL(chapterURL):gsub("(%w+://[^/]+)%.net", "%1.space")
+    -- Thanks to bigr4nd for figuring out that somehow .space domain bypasses cloudflare
+	local url = expandURL(chapterURL):gsub("(%w+://[^/]+)%.net", "%1.space")
 	--- Chapter page, extract info from it.
 	local document = GETDocument(url)
     local htmlElement = document:selectFirst("#chapter")
@@ -72,15 +72,19 @@ local function parseNovel(novelURL)
     img = img and img:attr("src") or imageURL
     local code = document:selectFirst("#novel-code"):text()
     local headers = HeadersBuilder():add("Origin", "https://www.mvlempyr.com"):build()
-    local chapter_data = json.GET("https://chap.mvlempyr.space/wp-json/wp/v2/posts?tags=" .. calculateTagId(code) .. "&per_page=500&page=1", headers)
     local chapters = {}
-    for i, v in next, chapter_data do
-        table.insert(chapters, NovelChapter {
-            order = v.acf.chapter_number,
-            title = v.acf.ch_name,
-            link = shrinkURL(v.link)
-        })
-    end
+    local page = 1
+    repeat
+        local chapter_data = json.GET("https://chap.mvlempyr.space/wp-json/wp/v2/posts?tags=" .. calculateTagId(novel_code) .. "&per_page=500&page=" .. page, headers)
+        for i, v in next, chapter_data do
+            table.insert(chapters, NovelChapter {
+                order = v.acf.chapter_number,
+                title = v.acf.ch_name,
+                link = shrinkURL(v.link)
+            })
+        end
+        page = page + 1
+    until #chapter_data < 500
 	return NovelInfo({
         title = document:selectFirst(".novel-title2"):text():gsub("\n" ,""),
         imageURL = img,
