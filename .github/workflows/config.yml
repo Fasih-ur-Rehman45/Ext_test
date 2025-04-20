@@ -25,10 +25,11 @@ jobs:
         path: bin
         key: ${{ runner.os }}-bin-${{ hashFiles('dev-setup.sh') }}
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4 # Updated to v4
+      uses: actions/upload-artifact@v4
       with:
-        name: bin
+        name: bin-artifact
         path: bin
+        retention-days: 1
 
   validate_index:
     needs: download
@@ -37,9 +38,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Download artifacts
-      uses: actions/download-artifact@v4 # Updated to v4
+      uses: actions/download-artifact@v4
       with:
-        name: bin
+        name: bin-artifact
         path: bin
     - name: Validate index
       run: |
@@ -54,9 +55,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Download artifacts
-      uses: actions/download-artifact@v4 # Updated to v4
+      uses: actions/download-artifact@v4
       with:
-        name: bin
+        name: bin-artifact
         path: bin
     - name: Get changed files
       id: changed-files
@@ -76,9 +77,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Download artifacts
-      uses: actions/download-artifact@v4 # Updated to v4
+      uses: actions/download-artifact@v4
       with:
-        name: bin
+        name: bin-artifact
         path: bin
     - name: Get changed files
       id: changed-files
