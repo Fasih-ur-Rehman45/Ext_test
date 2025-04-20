@@ -1,0 +1,113 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**/*.lua'
+      - 'index.json'
+  pull_request:
+    paths:
+      - 'src/**/*.lua'
+      - 'index.json'
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    container: openjdk:11
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup environment
+      run: ./dev-setup.sh --tester
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: bin
+        key: ${{ runner.os }}-bin-${{ hashFiles('dev-setup.sh') }}
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: bin
+        path: bin
+
+  validate_index:
+    needs: download
+    runs-on: ubuntu-latest
+    container: openjdk:11
+    steps:
+    - uses: actions/checkout@v4
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: bin
+        path: bin
+    - name: Validate index
+      run: |
+        java -jar bin/extension-tester.jar --ci --generate-index
+        DELTA=$(git diff --minimal -- index.json)
+        if [ ! -z "$DELTA" ]; then echo "Index file is not up to date: $DELTA"; exit 1; fi
+
+  validate_metadata:
+    needs: download
+    runs-on: ubuntu-latest
+    container: openjdk:11
+    steps:
+    - uses: actions/checkout@v4
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: bin
+        path: bin
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v41
+      with:
+        since_last_remote_commit: 'true'
+    - name: Validate metadata
+      run: |
+        if [ ! -z "${{ steps.changed-files.outputs.all_changed_files }}"]; then 
+          java -jar bin/extension-tester.jar --ci --validate-metadata ${{ steps.changed-files.outputs.all_changed_files }}
+        fi
+
+  test:
+    needs: download
+    runs-on: ubuntu-latest
+    container: openjdk:11
+    steps:
+    - uses: actions/checkout@v4
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: bin
+        path: bin
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v41
+      with:
+        since_last_remote_commit: 'true'
+    - name: Run tests
+      run: |
+        if [ ! -z "${{ steps.changed-files.outputs.all_changed_files }}"]; then 
+          java -jar bin/extension-tester.jar --ci ${{ steps.changed-files.outputs.all_changed_files }}
+        fi
+
+  deploy:
+    needs: [validate_index, validate_metadata, test]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    container: openjdk:11
+    steps:
+    - uses: actions/checkout@v4
+    - name: Create public directory
+      run: |
+        mkdir public
+        cp -r src public/
+        cp -r lib public/
+        cp -r icons public/
+        cp index.json public/
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./public
+        keep_files: true
