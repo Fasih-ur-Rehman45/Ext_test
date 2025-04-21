@@ -17,8 +17,13 @@ jobs:
     container: openjdk:11
     steps:
     - uses: actions/checkout@v4
-    - name: Setup environment
-      run:  bash ./dev-setup.sh --tester
+      name: Setup environment
+      run: |
+        if [ -x "$(command -v bash)" ]; then
+        bash ./dev-setup.sh --tester
+        else
+        sh ./dev-setup.sh --tester
+        fi
     - name: Cache dependencies
       uses: actions/cache@v3
       with:
