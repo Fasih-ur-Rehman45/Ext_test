@@ -17,18 +17,24 @@ jobs:
     container: openjdk:11
     steps:
     - uses: actions/checkout@v4
-      name: Setup environment
+    
+    - name: Make script executable
+      run: chmod +x ./dev-setup.sh
+    
+    - name: Setup environment
       run: |
         if [ -x "$(command -v bash)" ]; then
-        bash ./dev-setup.sh --tester
+          bash ./dev-setup.sh --tester
         else
-        sh ./dev-setup.sh --tester
+          sh ./dev-setup.sh --tester
         fi
+    
     - name: Cache dependencies
       uses: actions/cache@v3
       with:
         path: bin
         key: ${{ runner.os }}-bin-${{ hashFiles('dev-setup.sh') }}
+    
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -71,7 +77,7 @@ jobs:
         since_last_remote_commit: 'true'
     - name: Validate metadata
       run: |
-        if [ ! -z "${{ steps.changed-files.outputs.all_changed_files }}"]; then 
+        if [ ! -z "${{ steps.changed-files.outputs.all_changed_files }}" ]; then 
           java -jar bin/extension-tester.jar --ci --validate-metadata ${{ steps.changed-files.outputs.all_changed_files }}
         fi
 
@@ -93,7 +99,7 @@ jobs:
         since_last_remote_commit: 'true'
     - name: Run tests
       run: |
-        if [ ! -z "${{ steps.changed-files.outputs.all_changed_files }}"]; then 
+        if [ ! -z "${{ steps.changed-files.outputs.all_changed_files }}" ]; then 
           java -jar bin/extension-tester.jar --ci ${{ steps.changed-files.outputs.all_changed_files }}
         fi
 
