@@ -3,13 +3,17 @@ name: Changelog
 on:
   push:
     branches: [main]
+    paths-ignore:  # Files that WON'T trigger changelog updates
+      - 'README.md'
+      - '.github/**'
+      - 'test-server.sh'
   pull_request:
     types: [closed]
 
 jobs:
   changelog:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true || github.event_name == 'push'
     steps:
       - uses: actions/checkout@v4
         with:
