@@ -1,4 +1,4 @@
--- {"id":10256,"ver":"1.1.2","libVer":"1.0.0","author":""}
+-- {"id":10256,"ver":"1.1.3","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
@@ -93,8 +93,7 @@ local function getPassage(chapterURL)
     local payload = {
         chapter_id = content.chapter.id,
         language = "en",
-        raw_id = content.chapter.raw_id, 
-        translate = "ai",
+        raw_id = content.chapter.raw_id,
     }
     local body = RequestBody(json.encode(payload), mtype)
     local headers = HeadersBuilder():add("Content-Type", "application/json"):add("Referer", url):build()
