@@ -75,21 +75,24 @@ jobs:
       uses: tj-actions/changed-files@v41
       with:
         since_last_remote_commit: 'true'
-    - name: Validate metadata
-  run: |
-    if [ -n "${{ steps.changed-files.outputs.all_changed_files }}" ]; then
-      echo "Changed files: ${{ steps.changed-files.outputs.all_changed_files }}"
-      
-      # Filter and process only .lua files
-      for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-        if [[ "$file" == *.lua ]]; then
-          echo "Validating Lua file: $file"
-          java -jar bin/extension-tester.jar --ci --validate-metadata "$file"
+    - name: Validate Lua metadata
+      run: |
+        if [ -n "${{ steps.changed-files.outputs.all_changed_files }}" ]; then
+          echo "Changed files found"
+          
+          # Process each changed file
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            if [[ "$file" == *.lua ]]; then
+              echo "Validating: $file"
+              java -jar bin/extension-tester.jar --ci --validate-metadata "$file"
+            else
+              echo "Skipping non-Lua file: $file"
+            fi
+          done
+        else
+          echo "No files changed, skipping validation"
         fi
-      done
-    else
-      echo "No files changed, skipping validation"
-    fi
+
   test:
     needs: download
     runs-on: ubuntu-latest
@@ -106,22 +109,22 @@ jobs:
       uses: tj-actions/changed-files@v41
       with:
         since_last_remote_commit: 'true'
-    - name: Run tests
+    - name: Test
       run: |
         if [ -n "${{ steps.changed-files.outputs.all_changed_files }}" ]; then
-          echo "Changed files: ${{ steps.changed-files.outputs.all_changed_files }}"
+          echo "Changed files found"
           
           # Process each changed file
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
             if [[ "$file" == *.lua ]]; then
-              echo "Testing Lua file: $file"
-              java -jar bin/extension-tester.jar --ci "$file"
+              echo "Validating: $file"
+              java -jar bin/extension-tester.jar "$file"
             else
               echo "Skipping non-Lua file: $file"
             fi
           done
         else
-          echo "No Lua files changed, skipping tests"
+          echo "No files changed, skipping validation"
         fi
 
   deploy:
