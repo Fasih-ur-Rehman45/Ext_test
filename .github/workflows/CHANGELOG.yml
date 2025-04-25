@@ -22,7 +22,7 @@ jobs:
       - name: Generate Changelog
         uses: ardalanamini/auto-changelog@v4.0.2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
           output: CHANGELOG.md
           template: keepachangelog
           commit-style: conventional
