@@ -117,8 +117,8 @@ jobs:
           # Process each changed file
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
             if [[ "$file" == *.lua ]]; then
-              echo "Validating: $file"
-              java -jar bin/extension-tester.jar "$file"
+              echo "Testing Lua file: $file"
+              java -jar bin/extension-tester.jar --ci "$file"
             else
               echo "Skipping non-Lua file: $file"
             fi
