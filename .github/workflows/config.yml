@@ -107,20 +107,22 @@ jobs:
       with:
         since_last_remote_commit: 'true'
     - name: Run tests
-  run: |
-    # List of files to process (in real usage, this would come from changed-files output)
-    FILES="index.json src/en/wtr-lab.lua"
-    
-    echo "Changed files: $FILES"
-    
-    # Process each file individually, skipping non-Lua files
-    for file in $FILES; do
-      if [[ "$file" == *.lua ]]; then
-        echo "Testing Lua file: $file"
-        java -jar bin/extension-tester.jar --ci "$file"
-      else
-        echo "Skipping non-Lua file: $file"
-      fi
+      run: |
+        if [ -n "${{ steps.changed-files.outputs.all_changed_files }}" ]; then
+          echo "Changed files: ${{ steps.changed-files.outputs.all_changed_files }}"
+          
+          # Process each changed file
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            if [[ "$file" == *.lua ]]; then
+              echo "Testing Lua file: $file"
+              java -jar bin/extension-tester.jar --ci "$file"
+            else
+              echo "Skipping non-Lua file: $file"
+            fi
+          done
+        else
+          echo "No Lua files changed, skipping tests"
+        fi
 
   deploy:
     needs: [validate_index, validate_metadata, test]
