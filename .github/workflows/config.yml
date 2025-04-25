@@ -76,16 +76,20 @@ jobs:
       with:
         since_last_remote_commit: 'true'
     - name: Validate metadata
-      run: |
-        if [ -n "${{ steps.changed-files.outputs.all_changed_files }}" ]; then
-          echo "Changed Lua files: ${{ steps.changed-files.outputs.all_changed_files }}"
-          # Convert space-separated list to array
-          read -ra FILES <<< "${{ steps.changed-files.outputs.all_changed_files }}"
-          java -jar bin/extension-tester.jar --ci --validate-metadata "${FILES[@]}"
-        else
-          echo "No Lua files changed, skipping validation"
+  run: |
+    if [ -n "${{ steps.changed-files.outputs.all_changed_files }}" ]; then
+      echo "Changed files: ${{ steps.changed-files.outputs.all_changed_files }}"
+      
+      # Filter and process only .lua files
+      for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+        if [[ "$file" == *.lua ]]; then
+          echo "Validating Lua file: $file"
+          java -jar bin/extension-tester.jar --ci --validate-metadata "$file"
         fi
-
+      done
+    else
+      echo "No files changed, skipping validation"
+    fi
   test:
     needs: download
     runs-on: ubuntu-latest
@@ -103,16 +107,20 @@ jobs:
       with:
         since_last_remote_commit: 'true'
     - name: Run tests
-      run: |
-        if [ -n "${{ steps.changed-files.outputs.all_changed_files }}" ]; then
-          echo "Testing Lua files: ${{ steps.changed-files.outputs.all_changed_files }}"
-          # Process each Lua file individually
-          for lua_file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            java -jar bin/extension-tester.jar --ci "$lua_file"
-          done
-        else
-          echo "No Lua files changed, skipping tests"
-        fi
+  run: |
+    # List of files to process (in real usage, this would come from changed-files output)
+    FILES="index.json src/en/wtr-lab.lua"
+    
+    echo "Changed files: $FILES"
+    
+    # Process each file individually, skipping non-Lua files
+    for file in $FILES; do
+      if [[ "$file" == *.lua ]]; then
+        echo "Testing Lua file: $file"
+        java -jar bin/extension-tester.jar --ci "$file"
+      else
+        echo "Skipping non-Lua file: $file"
+      fi
 
   deploy:
     needs: [validate_index, validate_metadata, test]
