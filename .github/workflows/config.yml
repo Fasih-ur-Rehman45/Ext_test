@@ -77,8 +77,13 @@ jobs:
         since_last_remote_commit: 'true'
     - name: Validate metadata
       run: |
-        if [ ! -z "${{ steps.changed-files.outputs.all_changed_files }}" ]; then 
-          java -jar bin/extension-tester.jar --ci --validate-metadata ${{ steps.changed-files.outputs.all_changed_files }}
+        if [ -n "${{ steps.changed-files.outputs.all_changed_files }}" ]; then
+          echo "Changed Lua files: ${{ steps.changed-files.outputs.all_changed_files }}"
+          # Convert space-separated list to array
+          read -ra FILES <<< "${{ steps.changed-files.outputs.all_changed_files }}"
+          java -jar bin/extension-tester.jar --ci --validate-metadata "${FILES[@]}"
+        else
+          echo "No Lua files changed, skipping validation"
         fi
 
   test:
@@ -99,8 +104,14 @@ jobs:
         since_last_remote_commit: 'true'
     - name: Run tests
       run: |
-        if [ ! -z "${{ steps.changed-files.outputs.all_changed_files }}" ]; then 
-          java -jar bin/extension-tester.jar --ci ${{ steps.changed-files.outputs.all_changed_files }}
+        if [ -n "${{ steps.changed-files.outputs.all_changed_files }}" ]; then
+          echo "Testing Lua files: ${{ steps.changed-files.outputs.all_changed_files }}"
+          # Process each Lua file individually
+          for lua_file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            java -jar bin/extension-tester.jar --ci "$lua_file"
+          done
+        else
+          echo "No Lua files changed, skipping tests"
         fi
 
   deploy:
