@@ -1,4 +1,4 @@
--- {"id":10256,"ver":"1.1.1","libVer":"1.0.0","author":""}
+-- {"id":10256,"ver":"1.1.2","libVer":"1.0.0","author":""}
 
 local json = Require("dkjson")
 
@@ -156,7 +156,7 @@ local function parseNovel(novelURL)
         for i, ch in ipairs(chapterData.chapters) do
             chapters[#chapters+1] = NovelChapter {
                 title = ch.title,
-                link = "serie-" .. serie.serie_data.raw_id .. "/" .. serie.serie_data.slug .. "/chapter-" .. ch.order .. "?service=google",
+                link = "serie-" .. serie.serie_data.raw_id .. "/" .. serie.serie_data.slug .. "/chapter-" .. ch.order .. "?service=ai",
                 order = i
             }
         end
