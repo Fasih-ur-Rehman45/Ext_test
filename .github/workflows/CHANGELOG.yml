@@ -1,9 +1,10 @@
 name: Changelog
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
-    paths-ignore:
+      paths-ignore:
       - 'README.md'
       - '.github/**'
       - 'test-server.sh'
@@ -11,46 +12,29 @@ on:
     types: [closed]
 
 permissions:
-  contents: write 
+  contents: write
 
 jobs:
   changelog:
-    runs-on: ubuntu-latest
     if: github.event.pull_request.merged == true || github.event_name == 'push'
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Create empty changelog (if missing)
-        run: |
-          if [ ! -f "CHANGELOG.md" ]; then
-            echo "# Changelog" > CHANGELOG.md
-            echo "" >> CHANGELOG.md
-            echo "All notable changes to this project will be documented in this file." >> CHANGELOG.md
-          fi
-
-      - name: Generate Changelog
-        uses: ardalanamini/auto-changelog@v4.0.2
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          output-file: CHANGELOG.md
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          commit-types: |
-            feat: Features
-            fix: Bug Fixes
-            perf: Performance
-            refactor: Refactoring
-            docs: Documentation
-          default-commit-type: Other Changes
-          release-name: v1.0.0
-          include-compare-link: true
-          include-pr-links: true
+          node-version: '20'
 
-      - name: Debug file changes
+      - name: Install conventional-changelog
+        run: npm install -g conventional-changelog-cli
+
+      - name: Generate changelog
         run: |
-          git status
-          git diff
+          conventional-changelog -p angular -i CHANGELOG.md -s
 
       - name: Commit and push changelog
         run: |
