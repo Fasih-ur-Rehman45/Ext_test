@@ -19,20 +19,32 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: current version
+        id: version
+        run: |
+          # Extract version from package.json or other source
+          # Example for package.json:
+          VERSION=$(grep -m1 '"version"' package.json | cut -d'"' -f4)
+          echo "version=${VERSION:-0.1.0}" >> $GITHUB_OUTPUT
+          echo "Using version: $VERSION"
+
       - name: Generate Changelog
         uses: ardalanamini/auto-changelog@v4.0.2
         with:
-          token: ${{ github.token }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           output: CHANGELOG.md
-          template: keepachangelog
-          commit-style: conventional
-          breaking-pattern: '^break|BREAKING CHANGE'
-          categories: |
+          commit-types: |
             feat: Features
             fix: Bug Fixes
             perf: Performance
             refactor: Refactoring
             docs: Documentation
+          default-commit-type: Other Changes
+          release-name: v${{ steps.version.outputs.version }}
+          breaking-pattern: '^break|BREAKING CHANGE'
+          include-compare-link: true
+          include-pr-links: true
+          mention-authors: true
 
       - name: Commit changes
         run: |
