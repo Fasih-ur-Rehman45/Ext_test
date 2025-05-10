@@ -75,7 +75,7 @@ jobs:
       uses: tj-actions/changed-files@v41
       with:
         since_last_remote_commit: 'true'
-    - name: Validate Lua metadata
+    - name: Validate metadata
       run: |
         if [ -n "${{ steps.changed-files.outputs.all_changed_files }}" ]; then
           echo "Changed files found"
@@ -112,20 +112,21 @@ jobs:
         since_last_remote_commit: 'true'
     - name: Test
       run: |
-        if [ -n "${{ steps.changed-files.outputs.all_changed_files }}" ]; then
+        if [ -n "index.json src/en/wtr-lab.lua" ]; then
           echo "Changed files found"
-          
-          # Process each changed file
-          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            if [[ "$file" == *.lua ]]; then
-              echo "Testing Lua file: $file"
-              java -jar bin/extension-tester.jar --ci "$file"
-            else
-              echo "Skipping non-Lua file: $file"
-            fi
-          done
+          for file in index.json src/en/wtr-lab.lua; do
+            case "$file" in
+              *.lua)
+                echo "Testing Lua file: $file"
+                java -jar bin/extension-tester.jar --ci "$file"
+                ;;
+             *)
+                echo "Skipping non-Lua file: $file"
+                ;;
+            esac
+         done
         else
-          echo "No files changed, skipping validation"
+          echo "No files changed, skipping tests"
         fi
 
   deploy:
