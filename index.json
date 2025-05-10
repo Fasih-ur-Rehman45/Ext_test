@@ -155,9 +155,9 @@
       "fileName": "Noveltest",
       "imageURL": "https://i.imgur.com/KQOwfMt.png",
       "lang": "en",
-      "ver": "1.0.10",
+      "ver": "1.0.11",
       "libVer": "1.0.0",
-      "md5": "ecebf418b76a13d441730e1af5a6315a94ffc5895b3ffcbff9a05f3b4f6147a8",
+      "md5": "dfdd5dedf6f0169699ae61ce594a068566518169fcd5ae876dd2a010bb8e0e7b",
       "type": "LuaScript"
     },
     {
