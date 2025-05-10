@@ -15,6 +15,13 @@
       "website": ""
     },
     {
+      "id": -2017179821,
+      "name": "Doomsdayrs",
+      "desc": "Worked on NovelFull, Reaper Scans",
+      "imageURL": "",
+      "website": ""
+    },
+    {
       "id": -980691669,
       "name": "Confident-hate",
       "desc": "Worked on Noveltest",
@@ -25,13 +32,6 @@
       "id": 1379167306,
       "name": "David Kolf",
       "desc": "Worked on dkjson",
-      "imageURL": "",
-      "website": ""
-    },
-    {
-      "id": -2017179821,
-      "name": "Doomsdayrs",
-      "desc": "Worked on NovelFull",
       "imageURL": "",
       "website": ""
     },
@@ -127,6 +127,17 @@
     }
   ],
   "scripts": [
+    {
+      "id": 4223,
+      "name": "Reaper Scans",
+      "fileName": "ReaperScans",
+      "imageURL": "https://github.com/shosetsuorg/extensions/raw/dev/icons/ReaperScans.png",
+      "lang": "en",
+      "ver": "2.0.0",
+      "libVer": "1.0.0",
+      "md5": "2cd864d08eb1fcff82b52f50165677cf70432dea18f311faddc6aadf7c0837d6",
+      "type": "LuaScript"
+    },
     {
       "id": 4502,
       "name": "Team X Novel",
