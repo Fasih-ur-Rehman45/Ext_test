@@ -32,7 +32,7 @@ jobs:
           default-commit-type: Other Changes
           include-compare-link: true
           include-pr-links: true
-          release-name: main
+          release-name: v${{ steps.version.outputs.version }}
           mention-authors: true
           mention-new-contributors: true
           include-commit-links: true
