@@ -17,9 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Critical for getting full commit history
 
-      - name: Create empty changelog (if missing)
+      - name: Setup initial changelog
         run: |
           if [ ! -f "CHANGELOG.md" ]; then
             echo "# Changelog" > CHANGELOG.md
@@ -35,19 +35,33 @@ jobs:
           commit-types: |
             feat: Features
             fix: Bug Fixes
-            perf: Performance
-            refactor: Refactoring
+            perf: Performance Improvements
+            refactor: Code Refactoring
             docs: Documentation
           default-commit-type: Other Changes
-          release-name: v1.0.0
           breaking-pattern: '^break|BREAKING CHANGE'
           include-compare-link: true
           include-pr-links: true
+
+      - name: Verify changelog content
+        run: |
+          echo "Generated changelog content:"
+          cat CHANGELOG.md
+          echo ""
+          echo "Line count: $(wc -l < CHANGELOG.md)"
+          if [ ! -s "CHANGELOG.md" ]; then
+            echo "Error: CHANGELOG.md is empty!"
+            exit 1
+          fi
 
       - name: Commit changes
         run: |
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'actions@github.com'
           git add CHANGELOG.md
-          git commit -m "chore: update changelog [skip ci]" || echo "No changes to commit"
-          git push
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update changelog"
+            git push
+          fi
