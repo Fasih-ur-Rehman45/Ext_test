@@ -34,6 +34,7 @@ jobs:
       - name: Generate Changelog
         uses: ardalanamini/auto-changelog@v4.0.2
         with:
+          output-file: CHANGELOG.md
           github-token: ${{ secrets.GITHUB_TOKEN }}
           commit-types: |
             feat: Features
