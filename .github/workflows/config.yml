@@ -79,15 +79,16 @@ jobs:
       run: |
         if [ -n "${{ steps.changed-files.outputs.all_changed_files }}" ]; then
           echo "Changed files found"
-          
-          # Process each changed file
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            if [[ "$file" == *.lua ]]; then
-              echo "Validating: $file"
-              java -jar bin/extension-tester.jar --ci --validate-metadata "$file"
-            else
-              echo "Skipping non-Lua file: $file"
-            fi
+            case "$file" in
+              *.lua)
+                echo "Validating Lua file: $file"
+                java -jar bin/extension-tester.jar --ci --validate-metadata "$file"
+                ;;
+              *)
+                echo "Skipping non-Lua file: $file"
+                ;;
+            esac
           done
         else
           echo "No files changed, skipping validation"
