@@ -3,7 +3,7 @@ name: Changelog
 on:
   push:
     branches: [main]
-    paths-ignore:  # Files that WON'T trigger changelog updates
+    paths-ignore:
       - 'README.md'
       - '.github/**'
       - 'test-server.sh'
@@ -19,14 +19,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: current version
-        id: version
+      - name: Create empty changelog (if missing)
         run: |
-          # Extract version from package.json or other source
-          # Example for package.json:
-          VERSION=$(grep -m1 '"version"' package.json | cut -d'"' -f4)
-          echo "version=${VERSION:-0.1.0}" >> $GITHUB_OUTPUT
-          echo "Using version: $VERSION"
+          if [ ! -f "CHANGELOG.md" ]; then
+            echo "# Changelog" > CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            echo "All notable changes to this project will be documented in this file." >> CHANGELOG.md
+          fi
 
       - name: Generate Changelog
         uses: ardalanamini/auto-changelog@v4.0.2
@@ -40,11 +39,10 @@ jobs:
             refactor: Refactoring
             docs: Documentation
           default-commit-type: Other Changes
-          release-name: v${{ steps.version.outputs.version }}
+          release-name: v1.0.0
           breaking-pattern: '^break|BREAKING CHANGE'
           include-compare-link: true
           include-pr-links: true
-          mention-authors: true
 
       - name: Commit changes
         run: |
