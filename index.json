@@ -1,0 +1,188 @@
+{
+  "authors": [
+    {
+      "id": -821183208,
+      "name": "TechnoJo4",
+      "desc": "Worked on 247truyen, CommonCSS, Madara, NovelFull, WWVolare, url",
+      "imageURL": "",
+      "website": ""
+    },
+    {
+      "id": 0,
+      "name": "",
+      "desc": "Worked on MVLEMPYR, Wtr-Lab",
+      "imageURL": "",
+      "website": ""
+    },
+    {
+      "id": -2017179821,
+      "name": "Doomsdayrs",
+      "desc": "Worked on NovelFull, Reaper Scans",
+      "imageURL": "",
+      "website": ""
+    },
+    {
+      "id": -980691669,
+      "name": "Confident-hate",
+      "desc": "Worked on Noveltest",
+      "imageURL": "",
+      "website": ""
+    },
+    {
+      "id": 1379167306,
+      "name": "David Kolf",
+      "desc": "Worked on dkjson",
+      "imageURL": "",
+      "website": ""
+    },
+    {
+      "id": 320006131,
+      "name": "Emily empyreuma",
+      "desc": "Worked on bigint",
+      "imageURL": "",
+      "website": ""
+    },
+    {
+      "id": -931466336,
+      "name": "JFronny",
+      "desc": "Worked on XenForo",
+      "imageURL": "",
+      "website": ""
+    },
+    {
+      "id": -1833162487,
+      "name": "MechTechnology",
+      "desc": "Worked on Team X Novel",
+      "imageURL": "",
+      "website": ""
+    },
+    {
+      "id": -228911304,
+      "name": "Stepets",
+      "desc": "Worked on utf8",
+      "imageURL": "",
+      "website": ""
+    }
+  ],
+  "libraries": [
+    {
+      "name": "247truyen",
+      "ver": "1.1.2",
+      "url": null,
+      "hash": "5497988eb28d103e8f992981e3c6ee369d6d1a8171d3719c0361d8130fd9b860"
+    },
+    {
+      "name": "CommonCSS",
+      "ver": "1.0.1",
+      "url": null,
+      "hash": "eb398cff152cf1ff1a7ca7ad415f55bf55aca0acefafb5363982e083de18a67d"
+    },
+    {
+      "name": "Madara",
+      "ver": "2.9.1",
+      "url": null,
+      "hash": "ed160e1ab15729bd19f26fdff7acbcac27d2d7be7727441f059ff893db549357"
+    },
+    {
+      "name": "NovelFull",
+      "ver": "2.0.6",
+      "url": null,
+      "hash": "3f92488c9285e84bf5416fcf4539a008e6b2ca123711a408be2bd39fe69e05ab"
+    },
+    {
+      "name": "WWVolare",
+      "ver": "1.2.2",
+      "url": null,
+      "hash": "ae65d57adca4d64e2e1b713db84524e70b47b941d7cc58701aa8c665303bc024"
+    },
+    {
+      "name": "XenForo",
+      "ver": "1.0.5",
+      "url": null,
+      "hash": "99e92b56c773f2c567384bbb60962b612634915f328577953193cc70cc6e31c1"
+    },
+    {
+      "name": "bigint",
+      "ver": "1.0.0",
+      "url": null,
+      "hash": "03b457a591275e1392debffd7c898783fe0b83ae856007d95ccbfae084ef863f"
+    },
+    {
+      "name": "dkjson",
+      "ver": "1.0.1",
+      "url": null,
+      "hash": "97803cfe54b21695dda1e8f8a37c5933c4dc7691e5df17c2c1df6cef1203c259"
+    },
+    {
+      "name": "url",
+      "ver": "1.0.0",
+      "url": null,
+      "hash": "f34c81389a1f13b2f6c9caac7b3c098708cab8b4de27f8081812a65ead7bc51a"
+    },
+    {
+      "name": "utf8",
+      "ver": "1.0.0",
+      "url": null,
+      "hash": "385ac1f729ae11ec9ea60089d275e6d937857a0ee2a09291c5ce187e86966180"
+    }
+  ],
+  "scripts": [
+    {
+      "id": 4223,
+      "name": "Reaper Scans",
+      "fileName": "ReaperScans",
+      "imageURL": "https://github.com/shosetsuorg/extensions/raw/dev/icons/ReaperScans.png",
+      "lang": "en",
+      "ver": "2.0.0",
+      "libVer": "1.0.0",
+      "md5": "3be4d2a35e8f2f0b9cffb4ca2d9def085aa808211cce55420acd1614a3cdd831",
+      "type": "LuaScript"
+    },
+    {
+      "id": 4502,
+      "name": "Team X Novel",
+      "fileName": "TeamXNovel",
+      "imageURL": "https://github.com/shosetsuorg/extensions/raw/dev/icons/TeamXNovel.png",
+      "lang": "ar",
+      "ver": "1.0.5",
+      "libVer": "1.0.0",
+      "md5": "9923e1f4953d36b47c040728c271f7c811b1087835f136443f8b380f8c34f056",
+      "type": "LuaScript"
+    },
+    {
+      "id": 10155,
+      "name": "Noveltest",
+      "fileName": "Noveltest",
+      "imageURL": "https://i.imgur.com/KQOwfMt.png",
+      "lang": "en",
+      "ver": "1.0.10",
+      "libVer": "1.0.0",
+      "md5": "ecebf418b76a13d441730e1af5a6315a94ffc5895b3ffcbff9a05f3b4f6147a8",
+      "type": "LuaScript"
+    },
+    {
+      "id": 10256,
+      "name": "Wtr-Lab",
+      "fileName": "wtr-lab",
+      "imageURL": "https://i.imgur.com/ObQtFVW.png",
+      "lang": "en",
+      "ver": "1.0.4",
+      "libVer": "1.0.0",
+      "md5": "d12897d232627183ea737e30493eddc6c5481ecb411e24ca23890a1aed4acf96",
+      "type": "LuaScript"
+    },
+    {
+      "id": 620191,
+      "name": "MVLEMPYR",
+      "fileName": "mvlempyr",
+      "imageURL": "https://assets.mvlempyr.com/images/asset/LogoMage.webp",
+      "lang": "en",
+      "ver": "1.0.4",
+      "libVer": "1.0.0",
+      "md5": "3fd956eaa2ad1571e17911b9ebb04c2176dbd1652c6ed025ef12c50121bd3e66",
+      "type": "LuaScript"
+    }
+  ],
+  "styles": [],
+  "js": []
+}
