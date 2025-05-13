@@ -3,6 +3,15 @@ name: Changelog
 on:
   push:
     branches: [main]
+    paths-ignore:
+     - 'README.md'
+     - 'test-server.sh'
+     - 'dev-setup.sh'
+
+permissions:
+  contents: write
+  pull-requests: read
+  issues: read
 
 jobs:
   changelog:
@@ -26,20 +35,24 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           commit-types: |
-            feat: Features
-            fix: Bug Fixes
-            chore: Chores
-            docs: Documentation
-            refactor: Refactors
-            test: Tests
-            ci: CI/CD
-            style: Code Style
-            perf: Performance Improvements
-            build: Build System & Dependencies
+            feat: ✨ Features
+            fix: 🐛 Bug Fixes
+            chore: 🔧 Maintenance
+            docs: 📝 Documentation
+            refactor: ♻️ Refactors
+            test: 🧪 Tests
+            ci: 🔄 CI/CD
+            style: 💄 Code Style
+            perf: ⚡ Performance Improvements
+            build: 🏗️ Build System & Dependencies
           default-commit-type: Other
           release-name: v1.0.0
           mention-authors: true
-          
+          include-commit-links: true
+          use-github-autolink: true
+          mention-new-contributors: true
+          include-compare-link: true
+
       - name: Update CHANGELOG.md
         run: |
           echo "${{ steps.changelog.outputs.changelog }}" > CHANGELOG.md
