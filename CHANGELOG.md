@@ -111,7 +111,7 @@
 
 ## 📝 Documentation
 * **changelog:**
-  * update changelog (708e1308de97e1bd73783d827626f7c56e006867 & a6bab29ddaa8a148faeabcb6a4cca2338b990042 & d5ced8469212b03b05cf8f691fea4d3acf04be4b by @actions-user)
+  * update changelog (f7726657cf855d4caf8465fe08531ba31720dc3f & 822c64f4a9d094e6ac83f0adab695bb5dabdd643 by @Fasih-ur-Rehman45, 708e1308de97e1bd73783d827626f7c56e006867 & a6bab29ddaa8a148faeabcb6a4cca2338b990042 & d5ced8469212b03b05cf8f691fea4d3acf04be4b by @actions-user)
 
 ## ♻️ Refactors
 * remove ReaperScans module and associated functions (489cb1174084636fb855a5ba51a6b9079c021ac4 by @Fasih-ur-Rehman45)
