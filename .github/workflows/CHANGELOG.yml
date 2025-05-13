@@ -52,6 +52,15 @@ jobs:
           use-github-autolink: true
           mention-new-contributors: true
           include-compare-link: true
+          template: |
+            {{#each changelog}}
+            {{#if @key}}
+            ## {{@key}}
+            {{#each this}}
+            * {{message}} ({{#if commit}}[{{commit.hash.short}}]({{commit.url}}){{else}}commit{{/if}}){{#if author}} (@{{author.username}}){{/if}}
+            {{/each}}
+            {{/if}}
+            {{/each}}
 
       - name: Update CHANGELOG.md
         run: |
