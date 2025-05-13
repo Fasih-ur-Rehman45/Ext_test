@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths-ignore:
       - 'README.md'
-      ##- '.github/**'
+      ## - '.github/**'
       - 'test-server.sh'
   pull_request:
     types: [closed]
@@ -41,7 +41,12 @@ jobs:
 
       - name: Generate changelog
         run: |
-           conventional-changelog -p angular -i CHANGELOG.md -s .versionrc
+          conventional-changelog \
+            -p angular \
+            -i CHANGELOG.md \
+            -s \
+            --config .versionrc.json \
+            --release-count 1
 
       - name: Commit and push changelog
         run: |
