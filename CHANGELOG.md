@@ -1,4 +1,4 @@
-## Features
+## ✨ Features
 * Updated Index (9cf8358da04e7aa4e2f6ce27642113081e231d67 by @Fasih-ur-Rehman45)
 * **Cahangelog:**
   * add step to create empty changelog if missing (4644c9bb54d674971f4c47d516bb00999bb2a95c by @Fasih-ur-Rehman45)
@@ -7,7 +7,7 @@
 * **ReaperScans:**
   * add initial implementation for Reaper Scans integration (e461baf6f3b49e3b534e88df0d7fdc73096e150e by @Fasih-ur-Rehman45)
 
-## Bug Fixes
+## 🐛 Bug Fixes
 * Update config.yml (66af68e90991d7d93bb2fce943ea9e0a652a6256 by @Fasih-ur-Rehman45)
 * Updated index (5597057f308408d9ab321d3f1c91f69f02ff46d1 by @Fasih-ur-Rehman45)
 * Update index (cf6aacac101fa921e7a26296230171c5d120d990 by @Fasih-ur-Rehman45)
@@ -80,7 +80,9 @@
   * update version to 1.1.1 and enhance chapter content extraction (ada924bffe4254341630ffa8b80339ece6057696 by @Fasih-ur-Rehman45)
   * Updated Index (d4d252e2d023c5ffc1d83e28f315ff37ee7686a7 by @Fasih-ur-Rehman45)
 
-## Chores
+## 🔧 Maintenance
+* remove .versionrc.json configuration file (86d08cd49c6f0fc8445d115dc96cdae565387805 by @Fasih-ur-Rehman45)
+* update changelog workflow to improve structure and add emoji to commit types (cb70a3be1c830acca8f9f714cb9cf3b782d84ca1 by @Fasih-ur-Rehman45)
 * update changelog workflow to correctly reference changelog output and improve structure (8d49137e5e7de9b81507f98e79bb36c4dee437d1 by @Fasih-ur-Rehman45)
 * update changelog workflow to use 'output' instead of 'output-file' and enable GitHub compare link (74a3bcbca7f608ee60cb3806e1ceda0ac90b4fc5 by @Fasih-ur-Rehman45)
 * ensure output-file is specified for changelog generation (72a652514eb58014d783f71e2d3b627750f05ca0 by @Fasih-ur-Rehman45)
@@ -105,7 +107,11 @@
   * remove ignored path for GitHub workflows (0a9f9178c1157b08cc6d6efa0820a76f914a947e by @Fasih-ur-Rehman45)
   * update generation configuration (1a3d038daa91b6c1872449c8aa20b2b3833d7662 by @Fasih-ur-Rehman45)
 
-## Refactors
+## 📝 Documentation
+* **changelog:**
+  * update changelog (d5ced8469212b03b05cf8f691fea4d3acf04be4b by @actions-user)
+
+## ♻️ Refactors
 * remove ReaperScans module and associated functions (489cb1174084636fb855a5ba51a6b9079c021ac4 by @Fasih-ur-Rehman45)
 * update author details and remove obsolete script entry (c4963b11d36e377be2f440bbc29be03eefcd7b1d by @Fasih-ur-Rehman45)
 
