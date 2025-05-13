@@ -41,7 +41,7 @@ jobs:
 
       - name: Generate changelog
         run: |
-          conventional-changelog -p angular -i CHANGELOG.md -s
+           conventional-changelog -p angular -i CHANGELOG.md -s --config .versionrc
 
       - name: Commit and push changelog
         run: |
