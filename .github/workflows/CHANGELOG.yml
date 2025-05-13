@@ -21,6 +21,7 @@ jobs:
           fi
 
       - name: Generate Changelog
+        id: changelog
         uses: ardalanamini/auto-changelog@v4.0.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -38,7 +39,10 @@ jobs:
           default-commit-type: Other
           release-name: v1.0.0
           mention-authors: true
-          output: CHANGELOG.md
+          
+      - name: Update CHANGELOG.md
+        run: |
+          echo "${{ steps.changelog.outputs.changelog }}" > CHANGELOG.md
 
       - name: Commit and Push Changelog (if changed)
         run: |
