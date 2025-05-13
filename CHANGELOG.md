@@ -81,8 +81,6 @@
   * Updated Index (d4d252e2d023c5ffc1d83e28f315ff37ee7686a7 by @Fasih-ur-Rehman45)
 
 ## 🔧 Maintenance
-* restrict pull request branches to main only (02bbb3f1a080c0b703886252e73eb620b9c0dd6c by @Fasih-ur-Rehman45)
-* update workflow to include development branch for changelog generation (3c496d0755a46ed23e413d00333c39e75e5d49a2 by @Fasih-ur-Rehman45)
 * enable author mentions in changelog generation (50f5e4573fe2e09c3586652c39bb1728aa000831 by @Fasih-ur-Rehman45)
 * update changelog generation options to disable author mentions and commit links (61755aba6801fd308f68c1438904890d09447011 by @Fasih-ur-Rehman45)
 * update changelog generation options to disable commit links (4326bd6886c5b1cab794623b8d9ce388486bcbd3 by @Fasih-ur-Rehman45)
@@ -128,8 +126,4 @@
 
 ## Other
 * XenForo (dff9d9673f64f11ad8774a98f150275dddf0c039 by @Fasih-ur-Rehman45)
-
-
-## New Contributors
-* @Fasih-ur-Rehman45 made their first contribution in https://github.com/Fasih-ur-Rehman45/Ext_test/pull/1
 
