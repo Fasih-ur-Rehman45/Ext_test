@@ -81,6 +81,7 @@
   * Updated Index (d4d252e2d023c5ffc1d83e28f315ff37ee7686a7 by @Fasih-ur-Rehman45)
 
 ## 🔧 Maintenance
+* enhance changelog generation by including commit links and new contributors (9d98a66daed78b7163f3adf79f8d77f363145638 by @Fasih-ur-Rehman45)
 * simplify changelog generation by removing unused options and updating author configuration (32690a7173dcd4919e12ad5b39816289d6e877e4 by @Fasih-ur-Rehman45)
 * add template for changelog generation (5c662203257946899c1c9084a61889922ddd47a6 by @Fasih-ur-Rehman45)
 * remove .versionrc.json configuration file (86d08cd49c6f0fc8445d115dc96cdae565387805 by @Fasih-ur-Rehman45)
@@ -111,7 +112,7 @@
 
 ## 📝 Documentation
 * **changelog:**
-  * update changelog (f7726657cf855d4caf8465fe08531ba31720dc3f & 822c64f4a9d094e6ac83f0adab695bb5dabdd643 by @Fasih-ur-Rehman45, 708e1308de97e1bd73783d827626f7c56e006867 & a6bab29ddaa8a148faeabcb6a4cca2338b990042 & d5ced8469212b03b05cf8f691fea4d3acf04be4b by @actions-user)
+  * update changelog (c4663b2a279f915e87642dc8b2c522ec32446044 & f7726657cf855d4caf8465fe08531ba31720dc3f & 822c64f4a9d094e6ac83f0adab695bb5dabdd643 by @Fasih-ur-Rehman45, 708e1308de97e1bd73783d827626f7c56e006867 & a6bab29ddaa8a148faeabcb6a4cca2338b990042 & d5ced8469212b03b05cf8f691fea4d3acf04be4b by @actions-user)
 
 ## ♻️ Refactors
 * remove ReaperScans module and associated functions (489cb1174084636fb855a5ba51a6b9079c021ac4 by @Fasih-ur-Rehman45)
