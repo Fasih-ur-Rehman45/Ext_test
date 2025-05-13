@@ -48,19 +48,7 @@ jobs:
           default-commit-type: Other
           release-name: v1.0.0
           mention-authors: true
-          include-commit-links: true
           use-github-autolink: true
-          mention-new-contributors: true
-          include-compare-link: true
-          template: |
-            {{#each changelog}}
-            {{#if @key}}
-            ## {{@key}}
-            {{#each this}}
-            * {{message}} ({{#if commit}}[{{commit.hash.short}}]({{commit.url}}){{else}}commit{{/if}}){{#if author}} (@{{author.username}}){{/if}}
-            {{/each}}
-            {{/if}}
-            {{/each}}
 
       - name: Update CHANGELOG.md
         run: |
@@ -68,10 +56,12 @@ jobs:
 
       - name: Commit and Push Changelog (if changed)
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
+          AUTHOR_NAME=$(git log -1 --pretty=format:'%an')
+          AUTHOR_EMAIL=$(git log -1 --pretty=format:'%ae')
+          git config user.name "$AUTHOR_NAME"
+          git config user.email "$AUTHOR_EMAIL"
           git add CHANGELOG.md
           git diff --cached --quiet || {
-            git commit -m "docs(changelog): update changelog"
+            git commit -m "docs(changelog): update changelog [skip ci]"
             git push
           }
