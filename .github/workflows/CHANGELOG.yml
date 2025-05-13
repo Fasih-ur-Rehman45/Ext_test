@@ -39,6 +39,7 @@ jobs:
             ci: 🔄 CI/CD
           default-commit-type: Other
           release-name: v1.0.0
+          mention-authors: true
           mention-new-contributors: true
           use-github-autolink: true
 
