@@ -8,7 +8,7 @@ on:
      - 'test-server.sh'
      - 'dev-setup.sh'
   pull_request:
-    branches: [main,development]
+    branches: [main]
     paths-ignore:
      - 'README.md'
      - 'test-server.sh'
