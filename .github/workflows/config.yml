@@ -89,5 +89,9 @@ pages:
   artifacts:
     paths:
       - public
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**/*.lua'
+      - 'index.json"
