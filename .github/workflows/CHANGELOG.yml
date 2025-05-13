@@ -44,8 +44,7 @@ jobs:
             -p angular \
             -i CHANGELOG.md \
             -s \
-            --config .versionrc.json \
-            --release-count 1
+            --config .versionrc.json
 
       - name: Commit and push changelog
         run: |
