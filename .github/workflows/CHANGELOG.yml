@@ -41,8 +41,7 @@ jobs:
           release-name: v1.0.0
           mention-authors: true
           mention-new-contributors: true
-          include-compare-link: true
-          include-commit-links: true
+          include-commit-links: false
           use-github-autolink: true
 
       - name: Update CHANGELOG.md
