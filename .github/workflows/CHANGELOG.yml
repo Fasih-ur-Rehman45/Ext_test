@@ -2,6 +2,12 @@ name: Changelog
 
 on:
   push:
+    branches: [main,development]
+    paths-ignore:
+     - 'README.md'
+     - 'test-server.sh'
+     - 'dev-setup.sh'
+  pull_request:
     branches: [main]
     paths-ignore:
      - 'README.md'
