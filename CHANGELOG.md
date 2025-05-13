@@ -81,6 +81,7 @@
   * Updated Index (d4d252e2d023c5ffc1d83e28f315ff37ee7686a7 by @Fasih-ur-Rehman45)
 
 ## 🔧 Maintenance
+* enable author mentions in changelog generation (50f5e4573fe2e09c3586652c39bb1728aa000831 by @Fasih-ur-Rehman45)
 * update changelog generation options to disable author mentions and commit links (61755aba6801fd308f68c1438904890d09447011 by @Fasih-ur-Rehman45)
 * update changelog generation options to disable commit links (4326bd6886c5b1cab794623b8d9ce388486bcbd3 by @Fasih-ur-Rehman45)
 * remove unused commit types from changelog generation (31e78ecbb8402a078b53a17981f521145e78e1aa by @Fasih-ur-Rehman45)
@@ -117,7 +118,7 @@
 
 ## 📝 Documentation
 * **changelog:**
-  * update changelog (d64cae3ee0e22b04a62566ac44417af2304c3a2a & 331b643817f4304dba7000c07aee2d1fe02a4ff6 & 2c09bd44f9830c2e76a1c7eee16243febf865798 & a19db805333d51558db9a5ee98a9b2a4fd1ab9b8 & 423e5952f64b0bc06f3e8f69dba8debb42faf0c5 & c4663b2a279f915e87642dc8b2c522ec32446044 & f7726657cf855d4caf8465fe08531ba31720dc3f & 822c64f4a9d094e6ac83f0adab695bb5dabdd643 by @Fasih-ur-Rehman45, 708e1308de97e1bd73783d827626f7c56e006867 & a6bab29ddaa8a148faeabcb6a4cca2338b990042 & d5ced8469212b03b05cf8f691fea4d3acf04be4b by @actions-user)
+  * update changelog (9100715810e8f58df390b691a83877eb62ce92fe & d64cae3ee0e22b04a62566ac44417af2304c3a2a & 331b643817f4304dba7000c07aee2d1fe02a4ff6 & 2c09bd44f9830c2e76a1c7eee16243febf865798 & a19db805333d51558db9a5ee98a9b2a4fd1ab9b8 & 423e5952f64b0bc06f3e8f69dba8debb42faf0c5 & c4663b2a279f915e87642dc8b2c522ec32446044 & f7726657cf855d4caf8465fe08531ba31720dc3f & 822c64f4a9d094e6ac83f0adab695bb5dabdd643 by @Fasih-ur-Rehman45, 708e1308de97e1bd73783d827626f7c56e006867 & a6bab29ddaa8a148faeabcb6a4cca2338b990042 & d5ced8469212b03b05cf8f691fea4d3acf04be4b by @actions-user)
 
 ## ♻️ Refactors
 * remove ReaperScans module and associated functions (489cb1174084636fb855a5ba51a6b9079c021ac4 by @Fasih-ur-Rehman45)
