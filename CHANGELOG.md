@@ -81,6 +81,7 @@
   * Updated Index (d4d252e2d023c5ffc1d83e28f315ff37ee7686a7 by @Fasih-ur-Rehman45)
 
 ## 🔧 Maintenance
+* remove unused commit types from changelog generation (31e78ecbb8402a078b53a17981f521145e78e1aa by @Fasih-ur-Rehman45)
 * remove unnecessary permissions from changelog workflow (8a1f0acefda70486b4d162469f2af6ce75e89dcf by @Fasih-ur-Rehman45)
 * add include-compare-link option to changelog generation (f6de95256d8e584adedbcd09782919d881546522 by @Fasih-ur-Rehman45)
 * enhance changelog generation by including commit links and new contributors (9d98a66daed78b7163f3adf79f8d77f363145638 by @Fasih-ur-Rehman45)
@@ -114,7 +115,7 @@
 
 ## 📝 Documentation
 * **changelog:**
-  * update changelog (a19db805333d51558db9a5ee98a9b2a4fd1ab9b8 & 423e5952f64b0bc06f3e8f69dba8debb42faf0c5 & c4663b2a279f915e87642dc8b2c522ec32446044 & f7726657cf855d4caf8465fe08531ba31720dc3f & 822c64f4a9d094e6ac83f0adab695bb5dabdd643 by @Fasih-ur-Rehman45, 708e1308de97e1bd73783d827626f7c56e006867 & a6bab29ddaa8a148faeabcb6a4cca2338b990042 & d5ced8469212b03b05cf8f691fea4d3acf04be4b by @actions-user)
+  * update changelog (2c09bd44f9830c2e76a1c7eee16243febf865798 & a19db805333d51558db9a5ee98a9b2a4fd1ab9b8 & 423e5952f64b0bc06f3e8f69dba8debb42faf0c5 & c4663b2a279f915e87642dc8b2c522ec32446044 & f7726657cf855d4caf8465fe08531ba31720dc3f & 822c64f4a9d094e6ac83f0adab695bb5dabdd643 by @Fasih-ur-Rehman45, 708e1308de97e1bd73783d827626f7c56e006867 & a6bab29ddaa8a148faeabcb6a4cca2338b990042 & d5ced8469212b03b05cf8f691fea4d3acf04be4b by @actions-user)
 
 ## ♻️ Refactors
 * remove ReaperScans module and associated functions (489cb1174084636fb855a5ba51a6b9079c021ac4 by @Fasih-ur-Rehman45)
