@@ -39,6 +39,7 @@ jobs:
           release-name: v1.0.0
           mention-authors: true
           include-github-compare-link: true
+          output-file: CHANGELOG.md
 
       - name: Commit and Push Changelog (if changed)
         run: |
