@@ -8,11 +8,6 @@ on:
      - 'test-server.sh'
      - 'dev-setup.sh'
 
-permissions:
-  contents: write
-  pull-requests: read
-  issues: read
-
 jobs:
   changelog:
     runs-on: ubuntu-latest
