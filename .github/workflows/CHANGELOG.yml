@@ -42,10 +42,8 @@ jobs:
           release-name: v1.0.0
           mention-authors: true
           mention-new-contributors: true
-          include-compare-link: true
           include-pr-links: true
           include-commit-links: true
-          semver: true
           use-github-autolink: true
 
       # Process changelog output to match desired format
@@ -59,13 +57,14 @@ jobs:
           
           # Use sed to convert from default format to desired format
           # 1. Change bullet point style from "- " to "* "
-          # 2. Format the commit hash and author to match desired style
-          cat temp_changelog.md | 
-            sed 's/^- /\* /g' | 
-            sed -E 's/\(([a-f0-9]+) by (@?[^)]+)\)/(\[\1\](https:\/\/github.com\/${{ github.repository }}\/commit\/\1)) (\2)/g' > CHANGELOG.md
+          cat temp_changelog.md | sed 's/^- /\* /g' > formatted_changelog.md
           
-          # Remove temporary file
-          rm temp_changelog.md
+          # 2. Format the commit hash and author to match desired style
+          # We need to be careful with special characters, so we'll use simple replacements
+          cat formatted_changelog.md | sed -E 's/\(([a-f0-9]+) by (@[^)]+)\)/(\[\1\](https:\/\/github.com\/${{ github.repository }}\/commit\/\1)) (\2)/g' > CHANGELOG.md
+          
+          # Remove temporary files
+          rm temp_changelog.md formatted_changelog.md
 
       - name: Commit and Push Changelog (if changed)
         run: |
