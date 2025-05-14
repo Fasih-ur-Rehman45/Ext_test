@@ -60,8 +60,8 @@ jobs:
           cat temp_changelog.md | sed 's/^- /\* /g' > formatted_changelog.md
           
           # 2. Format the commit hash and author to match desired style
-          # We need to be careful with special characters, so we'll use simple replacements
-          cat formatted_changelog.md | sed -E 's/\(([a-f0-9]+) by (@[^)]+)\)/(\[\1\](https:\/\/github.com\/${{ github.repository }}\/commit\/\1)) (\2)/g' > CHANGELOG.md
+          # Using # as delimiter instead of / to avoid conflicts with URLs
+          cat formatted_changelog.md | sed -E 's#\(([a-f0-9]+) by (@[^)]+)\)#([\1](https://github.com/${{ github.repository }}/commit/\1)) (\2)#g' > CHANGELOG.md
           
           # Remove temporary files
           rm temp_changelog.md formatted_changelog.md
