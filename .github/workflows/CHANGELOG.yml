@@ -51,19 +51,9 @@ jobs:
         run: |
           # Get the raw changelog
           CHANGELOG="${{ steps.changelog.outputs.changelog }}"
-          
-          # Create a temporary file for processing
           echo "$CHANGELOG" > temp_changelog.md
-          
-          # Use sed to convert from default format to desired format
-          # 1. Change bullet point style from "- " to "* "
           cat temp_changelog.md | sed 's/^- /\* /g' > formatted_changelog.md
-          
-          # 2. Format the commit hash and author to match desired style
-          # Using # as delimiter instead of / to avoid conflicts with URLs
-          cat formatted_changelog.md | sed -E 's#\(([a-f0-9]+) by (@[^)]+)\)#([\1](https://github.com/${{ github.repository }}/commit/\1)) (\2)#g' > CHANGELOG.md
-          
-          # Remove temporary files
+          cat formatted_changelog.md | sed -E 's#\(([a-f0-9]{7})[a-f0-9]* by (@[^)]+)\)#([\1](https://github.com/${{ github.repository }}/commit/\1)) (\2)#g' > CHANGELOG.md
           rm temp_changelog.md formatted_changelog.md
 
       - name: Commit and Push Changelog (if changed)
