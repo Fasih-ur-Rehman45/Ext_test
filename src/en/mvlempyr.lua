@@ -1,4 +1,4 @@
--- {"id":620191,"ver":"1.0.15","libVer":"1.0.0","author":""}
+-- {"id":620191,"ver":"1.0.16","libVer":"1.0.0","author":""}
 local json = Require("dkjson")
 local bigint = Require("bigint")
 
@@ -129,8 +129,14 @@ local function getPassage(chapterURL)
     end
     local title = document:selectFirst(".ct-headline.ChapterName .ct-span")
     title = title and title:text() or "Untitled"
-    local ht = "<h1>" .. title .. "</h1>"
-    return ht .. pageOfElem(htmlElement, true)
+    local ht = "<h1>" .. title .. "</h1><br><br>"
+    -- Extract all <p> tags within #chapter and get their text content
+    local pTagList = map(htmlElement:select("p"), function(p) return p:text() end)
+    local htmlContent = ""
+    for _, v in pairs(pTagList) do
+        htmlContent = htmlContent .. v .. "<br><br>"
+    end
+    return ht .. pageOfElem(Document(htmlContent), true)
 end
 --- Calculate tag ID from novel code, matching TS convertNovelId
 local function calculateTagId(novel_code)
