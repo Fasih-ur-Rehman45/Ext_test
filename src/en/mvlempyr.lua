@@ -1,4 +1,4 @@
--- {"id":620191,"ver":"1.0.21","libVer":"1.0.0","author":""}
+-- {"id":620191,"ver":"1.0.22","libVer":"1.0.0","author":""}
 local json = Require("dkjson")
 local bigint = Require("bigint")
 
@@ -20,12 +20,12 @@ local imageURL = "https://assets.mvlempyr.com/images/asset/LogoMage.webp"
 
 --- URL handling functions.
 local function shrinkURL(url, _)
-    -- Match .com or .net at domain boundary, replace with .space
-    return url:gsub("(%w+://[^/]+)%.(com|net)(/|$)", "%1.space%3")
+    return url
 end
 
+
 local function expandURL(url, _)
-    return url:gsub("(%w+://[^/]+)%.(space)(/|$)", "%1.com%3")
+	return url
 end
 
 local startIndex = 1
@@ -126,7 +126,6 @@ end
 local function getPassage(chapterURL)
     -- Thanks to bigr4nd for figuring out that somehow .space domain bypasses cloudflare
 	local url = expandURL(chapterURL):gsub("(%w+://[^/]+)%.net", "%1.space")
-
 	--- Chapter page, extract info from it.
 	local document = GETDocument(url)
     local htmlElement = document:selectFirst("#chapter")
