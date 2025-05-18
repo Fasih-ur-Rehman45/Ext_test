@@ -1,4 +1,4 @@
--- {"id":620191,"ver":"1.0.22","libVer":"1.0.0","author":""}
+-- {"id":620191,"ver":"1.0.23","libVer":"1.0.0","author":""}
 local json = Require("dkjson")
 local bigint = Require("bigint")
 
@@ -46,7 +46,6 @@ local function loadAllNovels(startPage, endPage)
     endPage = endPage or startPage + 19 -- Default to 20 pages per batch
     if startPage < 1 then startPage = 1 end
     if endPage < startPage then endPage = startPage end
-
     for page = startPage, endPage do
         if loadedPages >= page then
             -- Skip already loaded pages
@@ -58,7 +57,6 @@ local function loadAllNovels(startPage, endPage)
             timeout = 60000,  -- 60 seconds timeout
             javascript = true
         })
-
         -- Detect total pages on first load
         if page == 1 then
             local totalTextElement = document:selectFirst(".w-page-count.hide")
@@ -110,14 +108,12 @@ local function loadAllNovels(startPage, endPage)
             newNovelsFound = true
             ::inner_continue::
         end
-
         -- Stop if no new novels are found
         if not newNovelsFound then
             return novels
         end
         ::continue::
     end
-
     return novels
 end
 --- @param chapterURL string The chapters shrunken URL.
@@ -157,55 +153,42 @@ local function parseNovel(novelURL)
     end)
     local img = document:selectFirst("img.novel-image2")
     img = img and img:attr("src") or imageURL
-    local code = document:selectFirst("#novel-code")
-    if not code then
-        error("Failed to find #novel-code element")
-    end
-    code = code:text()
+    local novel_code = document:selectFirst("#novel-code"):text()
     local headers = HeadersBuilder():add("Origin", baseURL):build()
     local chapters = {}
     local page = 1
-    local chapSite = "https://chap.mvlempyr.space/"
-    repeat
-        local chapter_url = chapSite .. "wp-json/wp/v2/posts?tags=" .. calculateTagId(code) .. "&per_page=500&page=" .. page
-        local chapter_data = json.GET(chapter_url, headers)
-        if not chapter_data then
-            break
-        end
-        for i, v in ipairs(chapter_data) do
-            local chapter = NovelChapter {
+      repeat
+        local chapter_data = json.GET("https://chap.mvlempyr.space/wp-json/wp/v2/posts?tags=" .. calculateTagId(novel_code) .. "&per_page=500&page=" .. page, headers)
+        for i, v in next, chapter_data do
+            table.insert(chapters, NovelChapter {
                 order = v.acf.chapter_number,
-                title = v.acf.ch_name or "Untitled Chapter",
-                link = shrinkURL(baseURL .. "chapter/" .. v.acf.novel_code .. "-" .. v.acf.chapter_number)
-            }
-            table.insert(chapters, chapter)
+                title = v.acf.ch_name,
+                link = shrinkURL(v.link)
+            })
         end
         page = page + 1
     until #chapter_data < 500
-    -- Reverse chapters to match TS implementation
-    local reversedChapters = {}
+     local reversedChapters = {}
     for i = 1, #chapters do
         reversedChapters[i] = chapters[#chapters - i + 1]
     end
-    return NovelInfo({
-        title = document:selectFirst(".novel-title2"):text():gsub("\n", ""),
+	return NovelInfo({
+        title = document:selectFirst(".novel-title2"):text():gsub("\n" ,""),
         imageURL = img,
         description = desc,
         chapters = reversedChapters
     })
 end
---- Get listing of novels
+
+local listing_page_parm
 local function getListing(data)
-    local listing_page_parm = nil
-    local url = "https://www.mvlempyr.com/novels" .. (listing_page_parm and (listing_page_parm .. data[PAGE]) or "")
-    url = url:gsub("(%w+://[^/]+)%.(com|net)(/|$)", "%1.space%3")
-    local document = GETDocument(url)
+    local document = GETDocument("https://www.mvlempyr.com/novels" .. (listing_page_parm and (listing_page_parm .. data[PAGE]) or ""))
     if not listing_page_parm then
-        local paginationElement = document:selectFirst(".g-tpage a.painationbutton.w--current, .g-tpage a.w-pagination-next")
-        if not paginationElement then
+        listing_page_parm = document:selectFirst(".g-tpage a.painationbutton.w--current, .g-tpage a.w-pagination-next")
+        if not listing_page_parm then
             error(document)
         end
-        listing_page_parm = paginationElement:attr("href")
+        listing_page_parm = listing_page_parm:attr("href")
         if not listing_page_parm then
             error("Failed to find listing href")
         end
@@ -216,9 +199,9 @@ local function getListing(data)
     end
     return map(document:select(".g-tpage div.searchlist[role=\"listitem\"] .novelcolumn .novelcolumimage a"), function(v)
         return Novel {
-            title = v:attr("title") or "Untitled",
-            link = shrinkURL("https://www.mvlempyr.com/" .. v:attr("href"):gsub("^/", "")),
-            imageURL = v:selectFirst("img"):attr("src") or imageURL
+            title = v:attr("title"),
+            link = "https://www.mvlempyr.com/" .. v:attr("href"),
+            imageURL = v:selectFirst("img"):attr("src")
         }
     end)
 end
