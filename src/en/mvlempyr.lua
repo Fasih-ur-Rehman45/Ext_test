@@ -1,4 +1,4 @@
--- {"id":620191,"ver":"1.0.23","libVer":"1.0.0","author":""}
+-- {"id":620191,"ver":"1.0.24","libVer":"1.0.0","author":""}
 local json = Require("dkjson")
 local bigint = Require("bigint")
 
@@ -154,7 +154,7 @@ local function parseNovel(novelURL)
     local img = document:selectFirst("img.novel-image2")
     img = img and img:attr("src") or imageURL
     local novel_code = document:selectFirst("#novel-code"):text()
-    local headers = HeadersBuilder():add("Origin", baseURL):build()
+    local headers = HeadersBuilder():add("Origin", "https://www.mvlempyr.com"):build()
     local chapters = {}
     local page = 1
       repeat
@@ -168,15 +168,11 @@ local function parseNovel(novelURL)
         end
         page = page + 1
     until #chapter_data < 500
-     local reversedChapters = {}
-    for i = 1, #chapters do
-        reversedChapters[i] = chapters[#chapters - i + 1]
-    end
 	return NovelInfo({
         title = document:selectFirst(".novel-title2"):text():gsub("\n" ,""),
         imageURL = img,
         description = desc,
-        chapters = reversedChapters
+        chapters = chapters
     })
 end
 
