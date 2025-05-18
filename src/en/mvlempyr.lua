@@ -1,4 +1,4 @@
--- {"id":620191,"ver":"1.0.20","libVer":"1.0.0","author":""}
+-- {"id":620191,"ver":"1.0.21","libVer":"1.0.0","author":""}
 local json = Require("dkjson")
 local bigint = Require("bigint")
 
@@ -130,12 +130,7 @@ local function getPassage(chapterURL)
 	--- Chapter page, extract info from it.
 	local document = GETDocument(url)
     local htmlElement = document:selectFirst("#chapter")
-    local pTagList = map(htmlElement:select("p"), text)
-    local htmlContent = ""
-    for _, v in pairs(pTagList) do
-        htmlContent = htmlContent .. "<br><br>" .. v
-    end
-    return pageOfElem(Document(htmlContent), true)
+    return pageOfElem(htmlElement, true)
 end
 --- Calculate tag ID from novel code, matching TS convertNovelId
 local function calculateTagId(novel_code)
