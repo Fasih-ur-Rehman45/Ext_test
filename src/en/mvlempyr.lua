@@ -1,4 +1,4 @@
--- {"id":620191,"ver":"1.0.19","libVer":"1.0.0","author":""}
+-- {"id":620191,"ver":"1.0.20","libVer":"1.0.0","author":""}
 local json = Require("dkjson")
 local bigint = Require("bigint")
 
@@ -124,22 +124,13 @@ end
 --- @param chapterURL string The chapters shrunken URL.
 --- @return string String of chapter
 local function getPassage(chapterURL)
-    local url = expandURL(chapterURL)
-    local document = GETDocument(url)
+    -- Thanks to bigr4nd for figuring out that somehow .space domain bypasses cloudflare
+	local url = expandURL(chapterURL):gsub("(%w+://[^/]+)%.net", "%1.space")
+
+	--- Chapter page, extract info from it.
+	local document = GETDocument(url)
     local htmlElement = document:selectFirst("#chapter")
-    local doc = Document(htmlElement)
-    -- Traverse the document to remove empty <p> tags
-    local toRemove = {}
-    doc:traverse(NodeVisitor(function(v)
-        if v:tagName() == "p" and v:text() == "" then
-            toRemove[#toRemove + 1] = v
-        end
-    end, nil, true))
-    -- Remove the empty <p> tags
-    for _, v in ipairs(toRemove) do
-        v:remove()
-    end
-    local pTagList = map(doc:select("p"), text)
+    local pTagList = map(htmlElement:select("p"), text)
     local htmlContent = ""
     for _, v in pairs(pTagList) do
         htmlContent = htmlContent .. "<br><br>" .. v
