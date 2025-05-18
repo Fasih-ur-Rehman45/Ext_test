@@ -1,4 +1,4 @@
--- {"id":620191,"ver":"1.0.12","libVer":"1.0.0","author":""}
+-- {"id":620191,"ver":"1.0.13","libVer":"1.0.0","author":""}
 local json = Require("dkjson")
 local bigint = Require("bigint")
 
@@ -35,11 +35,9 @@ local function checkCaptcha(doc)
         error("Captcha error, please open in webview")
     end
 end
-
---- Load all novels from advance-search, inspired by TS getAllNovels
+--- Load all novels from advance-search, inspired by TS getAllNovels (NLReader)
 local function loadAllNovels()
     if allNovels then
-        print("Using cached novels: " .. #allNovels)
         return allNovels
     end
     allNovels = {}
@@ -51,13 +49,11 @@ local function loadAllNovels()
 
     -- Initial page load
     local url = (baseURL .. "advance-search"):gsub("(%w+://[^/]+)%.(com|net)(/|$)", "%1.space%3")
-    print("Fetching novels from: " .. url .. " (page " .. page .. ")")
     local document = GETDocument(url, {
         timeout = 90000,  -- Increased to 90 seconds for better JavaScript rendering
         javascript = true
     })
     checkCaptcha(document)
-
     -- Try to parse total novels to calculate total pages
     local totalTextElement = document:selectFirst(".w-page-count.hide")
     local totalText = totalTextElement and totalTextElement:text() or nil
@@ -65,35 +61,25 @@ local function loadAllNovels()
         local _, _, current, total = totalText:match("Showing (%d+) out of (%d+) novels")
         current = tonumber(current) or 0
         total = tonumber(total) or 0
-        print("Detected: Showing " .. current .. " out of " .. total .. " novels")
         if total > 0 then
             totalPages = math.ceil(total / 15) -- 15 novels per page
             useNextLink = false -- Use total pages for iteration
         end
-    else
-        print("Failed to find total novels count, falling back to next page links")
     end
-
     -- Extract pagination parameter from "next page" link
     local nextPageLink = document:selectFirst("a.w-pagination-next.next")
     if nextPageLink and nextPageLink:attr("href") then
         local href = nextPageLink:attr("href")
         pageQueryId = href:match("%?([^=]+)_page=") or pageQueryId
-        print("Pagination parameter: " .. pageQueryId)
-    else
-        print("No pagination parameter found, using default: " .. pageQueryId)
     end
-
     while true do
         -- Construct URL for the current page
         url = (baseURL .. "advance-search" .. (page > 1 and "?" .. pageQueryId .. "_page=" .. page or "")):gsub("(%w+://[^/]+)%.(com|net)(/|$)", "%1.space%3")
-        print("Fetching novels from: " .. url .. " (page " .. page .. (totalPages and " of " .. totalPages or "") .. ")")
         document = GETDocument(url, {
-            timeout = 90000,
+            timeout = 60000,
             javascript = true
         })
         checkCaptcha(document)
-
         -- Parse novels on the current page
         local elements = document:select(".novelcolumn")
         local newNovelsFound = false
@@ -101,24 +87,20 @@ local function loadAllNovels()
             local v = elements:get(i)
             local name = v:selectFirst("h2[fs-cmsfilter-field=\"name\"]")
             if not name then
-                print("Skipping: No h2 found in novelcolumn")
                 goto continue
             end
             name = name:text()
             local linkElement = v:selectFirst("a")
             if not linkElement then
-                print("Skipping: No link found for " .. name)
                 goto continue
             end
             local link = linkElement:attr("href")
             if not link or link == "" then
-                print("Skipping: Empty href for " .. name)
                 goto continue
             end
             link = link:gsub("^/", "")
             link = baseURL .. link
             if seenLinks[link] then
-                print("Skipping duplicate link: " .. link)
                 goto continue
             end
             seenLinks[link] = true
@@ -129,14 +111,12 @@ local function loadAllNovels()
                 link = shrinkURL(link),
                 imageURL = image
             })
-            print("Added Novel: " .. name .. " | Link: " .. link)
             newNovelsFound = true
             ::continue::
         end
 
         -- Stop if no new novels are found
         if not newNovelsFound then
-            print("No new novels found on page " .. page .. ", stopping pagination")
             break
         end
 
@@ -144,7 +124,6 @@ local function loadAllNovels()
         if not useNextLink then
             -- Using total pages
             if page >= totalPages then
-                print("Reached total pages (" .. totalPages .. "), stopping pagination")
                 break
             end
             page = page + 1
@@ -155,13 +134,11 @@ local function loadAllNovels()
                 url = baseURL .. nextPageLink:attr("href")
                 page = page + 1
             else
-                print("No next page link found, stopping pagination")
                 break
             end
         end
     end
 
-    print("Total Novels Loaded: " .. #allNovels)
     return allNovels
 end
 
@@ -169,7 +146,6 @@ end
 --- @return string String of chapter
 local function getPassage(chapterURL)
     local url = expandURL(chapterURL)
-    print("Fetching passage from: " .. url)
     local document = GETDocument(url)
     checkCaptcha(document)
     local htmlElement = document:selectFirst("#chapter")
@@ -203,7 +179,6 @@ end
 --- @return NovelInfo
 local function parseNovel(novelURL)
     local url = expandURL(novelURL)
-    print("Fetching novel info from: " .. url)
     local document = GETDocument(url)
     checkCaptcha(document)
 
@@ -225,10 +200,8 @@ local function parseNovel(novelURL)
     local chapSite = "https://chap.mvlempyr.space/"
     repeat
         local chapter_url = chapSite .. "wp-json/wp/v2/posts?tags=" .. calculateTagId(code) .. "&per_page=500&page=" .. page
-        print("Fetching chapters from: " .. chapter_url)
         local chapter_data = json.GET(chapter_url, headers)
         if not chapter_data then
-            print("No chapter data returned, stopping pagination")
             break
         end
         for i, v in ipairs(chapter_data) do
@@ -258,27 +231,37 @@ end
 
 --- Get listing of novels
 local function getListing(data)
-    local url = (baseURL .. "novels" .. (data[PAGE] and "?page=" .. data[PAGE] or "")):gsub("(%w+://[^/]+)%.(com|net)(/|$)", "%1.space%3")
-    print("Fetching listing from: " .. url)
+    local listing_page_parm = nil
+    local url = "https://www.mvlempyr.com/novels" .. (listing_page_parm and (listing_page_parm .. data[PAGE]) or "")
+    url = url:gsub("(%w+://[^/]+)%.(com|net)(/|$)", "%1.space%3")
     local document = GETDocument(url)
     checkCaptcha(document)
-    local elements = document:select(".g-tpage div.searchlist[role=\"listitem\"] .novelcolumn .novelcolumimage a")
-    local novels = {}
-    for i = 0, elements:size() - 1 do
-        local v = elements:get(i)
-        table.insert(novels, Novel {
-            title = v:attr("title") or "Untitled",
-            link = shrinkURL(baseURL .. v:attr("href"):gsub("^/", "")),
-            imageURL = v:selectFirst("img"):attr("src") or imageURL
-        })
+    if not listing_page_parm then
+        local paginationElement = document:selectFirst(".g-tpage a.painationbutton.w--current, .g-tpage a.w-pagination-next")
+        if not paginationElement then
+            error(document)
+        end
+        listing_page_parm = paginationElement:attr("href")
+        if not listing_page_parm then
+            error("Failed to find listing href")
+        end
+        listing_page_parm = listing_page_parm:match("%?[^=]+=")
+        if not listing_page_parm then
+            error("Failed to find listing match")
+        end
     end
-    return novels
+    return map(document:select(".g-tpage div.searchlist[role=\"listitem\"] .novelcolumn .novelcolumimage a"), function(v)
+        return Novel {
+            title = v:attr("title") or "Untitled",
+            link = shrinkURL("https://www.mvlempyr.com/" .. v:attr("href"):gsub("^/", "")),
+            imageURL = v:selectFirst("img"):attr("src") or imageURL
+        }
+    end)
 end
 
 --- Search novels, inspired by TS searchNovels
 local function search(data)
     local query = data[QUERY]:lower()
-    print("Search Query: " .. query)
     
     -- Load all novels, inspired by TS getAllNovels
     local novels = loadAllNovels()
@@ -287,7 +270,6 @@ local function search(data)
     -- Filter novels based on search term, inspired by TS searchNovels
     for _, novel in ipairs(novels) do
         if novel.title:lower():find(query, 1, true) then
-            print("Matching Novel: " .. novel.title)
             table.insert(filtered, Novel {
                 title = novel.title,
                 link = novel.link,
@@ -304,12 +286,10 @@ local function search(data)
     
     -- Adjust for out-of-bounds pages
     if startIndex > #filtered and #filtered > 0 then
-        print("Adjusting to page 1 due to out-of-bounds page " .. page)
         startIndex = 1
         endIndex = math.min(perPage, #filtered)
         page = 1
     elseif startIndex > #filtered then
-        print("No results for page " .. page)
         return {}
     end
     
