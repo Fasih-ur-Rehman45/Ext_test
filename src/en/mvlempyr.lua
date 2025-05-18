@@ -23,7 +23,6 @@ local function shrinkURL(url, _)
     return url
 end
 
-
 local function expandURL(url, _)
 	return url
 end
