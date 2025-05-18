@@ -1,4 +1,4 @@
--- {"id":620191,"ver":"1.0.13","libVer":"1.0.0","author":""}
+-- {"id":620191,"ver":"1.0.14","libVer":"1.0.0","author":""}
 local json = Require("dkjson")
 local bigint = Require("bigint")
 
@@ -50,7 +50,7 @@ local function loadAllNovels()
     -- Initial page load
     local url = (baseURL .. "advance-search"):gsub("(%w+://[^/]+)%.(com|net)(/|$)", "%1.space%3")
     local document = GETDocument(url, {
-        timeout = 90000,  -- Increased to 90 seconds for better JavaScript rendering
+        timeout = 60000,  -- Increased to 90 seconds for better JavaScript rendering
         javascript = true
     })
     checkCaptcha(document)
