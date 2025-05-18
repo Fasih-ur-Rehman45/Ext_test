@@ -1,4 +1,4 @@
--- {"id":620191,"ver":"1.0.17","libVer":"1.0.0","author":""}
+-- {"id":620191,"ver":"1.0.18","libVer":"1.0.0","author":""}
 local json = Require("dkjson")
 local bigint = Require("bigint")
 
@@ -127,17 +127,23 @@ local function getPassage(chapterURL)
     local url = expandURL(chapterURL)
     local document = GETDocument(url)
     local htmlElement = document:selectFirst("#chapter")
+
     if not htmlElement then
         error("Failed to find #chapter element")
     end
     local title = document:selectFirst(".ct-headline.ChapterName .ct-span")
     title = title and title:text() or "Untitled"
     local ht = "<h1>" .. title .. "</h1><br><br>"
-    -- Extract all <p> tags within #chapter and get their text content
-  local pTagList = map(htmlElement:select("p"), text)
+     local toRemove = {}
+    htmlElement:traverse(NodeVisitor(function(v)
+        if v:tagName() == "p" and v:text() == "" then
+            toRemove[#toRemove + 1] = v
+        end
+    end, nil, true))
+    local pTagList = map(htmlElement:select("p"), text)
     local htmlContent = ""
     for _, v in pairs(pTagList) do
-        htmlContent = htmlContent .. "<br><br>" .. v
+        htmlContent = htmlContent .."<br><br>" .. v
     end
     return ht .. pageOfElem(Document(htmlContent), true)
 end

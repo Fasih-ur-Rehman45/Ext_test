@@ -166,9 +166,9 @@
       "fileName": "mvlempyr",
       "imageURL": "https://assets.mvlempyr.com/images/asset/LogoMage.webp",
       "lang": "en",
-      "ver": "1.0.17",
+      "ver": "1.0.18",
       "libVer": "1.0.0",
-      "md5": "0553632eb17a3e15aefcb859aa30c91339c22a39aae0233c19027c21398eb710",
+      "md5": "c939e5db53376bf843bcab4479089241a554cda655f465f5abd7a29014e12928",
       "type": "LuaScript"
     }
   ],
