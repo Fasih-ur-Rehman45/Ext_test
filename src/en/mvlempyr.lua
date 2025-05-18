@@ -1,4 +1,4 @@
--- {"id":620191,"ver":"1.0.16","libVer":"1.0.0","author":""}
+-- {"id":620191,"ver":"1.0.17","libVer":"1.0.0","author":""}
 local json = Require("dkjson")
 local bigint = Require("bigint")
 
@@ -6,6 +6,11 @@ local bigint = Require("bigint")
 local id = 620191
 
 local name = "MVLEMPYR"
+
+---@param v Element
+local text = function(v)
+    return v:text()
+end
 
 --- Base URL of the extension.
 local baseURL = "https://www.mvlempyr.com/"
@@ -30,7 +35,6 @@ local allNovels = nil
 local loadedPages = 0 -- Track loaded pages
 local totalPages = nil -- Store total pages if detected
 local pageQueryId = "c5c66f03" -- Default pagination parameter
-
 --- Load novels from advance-search with paginated loading
 local function loadAllNovels(startPage, endPage)
     if not allNovels then
@@ -38,7 +42,6 @@ local function loadAllNovels(startPage, endPage)
     end
     local novels = allNovels.novels
     local seenLinks = allNovels.seenLinks
-
     -- Ensure valid page range
     startPage = startPage or 1
     endPage = endPage or startPage + 19 -- Default to 20 pages per batch
@@ -131,10 +134,10 @@ local function getPassage(chapterURL)
     title = title and title:text() or "Untitled"
     local ht = "<h1>" .. title .. "</h1><br><br>"
     -- Extract all <p> tags within #chapter and get their text content
-    local pTagList = map(htmlElement:select("p"), function(p) return p:text() end)
+  local pTagList = map(htmlElement:select("p"), text)
     local htmlContent = ""
     for _, v in pairs(pTagList) do
-        htmlContent = htmlContent .. v .. "<br><br>"
+        htmlContent = htmlContent .. "<br><br>" .. v
     end
     return ht .. pageOfElem(Document(htmlContent), true)
 end
