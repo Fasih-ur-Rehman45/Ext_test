@@ -1,4 +1,4 @@
--- {"id":620191,"ver":"1.0.25","libVer":"1.0.0","author":""}
+-- {"id":620191,"ver":"1.0.26","libVer":"1.0.0","author":""}
 local json = Require("dkjson")
 local bigint = Require("bigint")
 
@@ -26,31 +26,42 @@ local function shrinkURL(url, _)
 end
 
 local function expandURL(url, _)
-	return url
+    return url
 end
 
 local startIndex = 1
 
---- Cache for all novels
-local allNovels = nil
+--- Cache for matching novels only
+local matchingNovels = nil
 local loadedPages = 0 -- Track loaded pages
 local totalPages = nil -- Store total pages if detected
 local pageQueryId = "c5c66f03" -- Default pagination parameter
+local queryCache = {} -- Cache for query results
+
+--- Clear the novels cache
+local function clearNovelsCache()
+    matchingNovels = nil
+    loadedPages = 0
+    totalPages = nil
+end
+
 --- Load novels from advance-search with paginated loading
-local function loadAllNovels(startPage, endPage)
-    if not allNovels then
-        allNovels = { novels = {}, seenLinks = {} }
-    end
-    local novels = allNovels.novels
-    local seenLinks = allNovels.seenLinks
+--- Returns novels, whether any matches were found, and the next page link
+local function loadAllNovels(startPage, endPage, query)
+    query = query:lower()
+    local novels = {} -- Temporary list for this batch
+    local seenLinks = {} -- Temporary deduplication for this batch
     -- Ensure valid page range
     startPage = startPage or 1
     endPage = endPage or startPage + 19 -- Default to 20 pages per batch
     if startPage < 1 then startPage = 1 end
     if endPage < startPage then endPage = startPage end
+    
+    local lastNextPageLink = nil -- Store the last "Next Page" link
+    local hasMatches = false -- Track if any novels match the query in this batch
+    
     for page = startPage, endPage do
         if loadedPages >= page then
-            -- Skip already loaded pages
             goto continue
         end
         loadedPages = loadedPages + 1
@@ -76,6 +87,13 @@ local function loadAllNovels(startPage, endPage)
                 pageQueryId = href:match("%?([^=]+)_page=") or pageQueryId
             end
         end
+        -- Check for "Next Page" link on the current page
+        local nextPageLink = document:selectFirst("a.w-pagination-next.next")
+        if nextPageLink and nextPageLink:attr("href") then
+            lastNextPageLink = nextPageLink:attr("href")
+        else
+            lastNextPageLink = nil
+        end
         -- Parse novels on the current page
         local elements = document:select(".novelcolumn")
         local newNovelsFound = false
@@ -96,38 +114,46 @@ local function loadAllNovels(startPage, endPage)
             end
             link = link:gsub("^/", "")
             link = baseURL .. link
-            if seenLinks[link] then
+            local uniqueKey = link .. "|" .. name
+            if seenLinks[uniqueKey] then
                 goto inner_continue
             end
-            seenLinks[link] = true
+            seenLinks[uniqueKey] = true
             local image = v:selectFirst("img")
             image = image and image:attr("src") or imageURL
-            table.insert(novels, {
+            local novel = {
                 title = name,
                 link = shrinkURL(link),
                 imageURL = image
-            })
+            }
+            table.insert(novels, novel)
+            -- Check if this novel matches the query
+            local title = name:lower()
+            if title:find(query, 1, true) then
+                hasMatches = true
+            end
             newNovelsFound = true
             ::inner_continue::
         end
-        -- Stop if no new novels are found
         if not newNovelsFound then
-            return novels
+            return novels, hasMatches, lastNextPageLink
         end
         ::continue::
     end
-    return novels
+    return novels, hasMatches, lastNextPageLink
 end
+
 --- @param chapterURL string The chapters shrunken URL.
 --- @return string String of chapter
 local function getPassage(chapterURL)
     -- Thanks to bigr4nd for figuring out that somehow .space domain bypasses cloudflare
-	local url = expandURL(chapterURL):gsub("(%w+://[^/]+)%.net", "%1.space")
-	--- Chapter page, extract info from it.
-	local document = GETDocument(url)
+    local url = expandURL(chapterURL):gsub("(%w+://[^/]+)%.net", "%1.space")
+    --- Chapter page, extract info from it.
+    local document = GETDocument(url)
     local htmlElement = document:selectFirst("#chapter")
     return pageOfElem(htmlElement, true)
 end
+
 --- Calculate tag ID from novel code, matching TS convertNovelId
 local function calculateTagId(novel_code)
     local t = bigint.new("1999999997")
@@ -143,6 +169,7 @@ local function calculateTagId(novel_code)
     end
     return bigint.unserialize(u, "string")
 end
+
 --- Load info on a novel.
 --- @param novelURL string shrunken novel url.
 --- @return NovelInfo
@@ -159,7 +186,7 @@ local function parseNovel(novelURL)
     local headers = HeadersBuilder():add("Origin", "https://www.mvlempyr.com"):build()
     local chapters = {}
     local page = 1
-      repeat
+    repeat
         local chapter_data = json.GET("https://chap.mvlempyr.space/wp-json/wp/v2/posts?tags=" .. calculateTagId(novel_code) .. "&per_page=500&page=" .. page, headers)
         for i, v in next, chapter_data do
             table.insert(chapters, NovelChapter {
@@ -170,7 +197,7 @@ local function parseNovel(novelURL)
         end
         page = page + 1
     until #chapter_data < 500
-	return NovelInfo({
+    return NovelInfo({
         title = document:selectFirst(".novel-title2"):text():gsub("\n" ,""),
         imageURL = img,
         description = desc,
@@ -203,82 +230,80 @@ local function getListing(data)
         }
     end)
 end
+
 --- Search novels, inspired by TS searchNovels
 local function search(data)
     local query = data[QUERY] or ""
     query = query:lower()
-    -- Load the first 20 pages (300 novels)
-    local pageBatchSize = 20
-    local currentStartPage = 1
-    local novels = loadAllNovels(currentStartPage, currentStartPage + pageBatchSize - 1)
-    local filtered = {}
-    -- Filter novels based on search term
-    for _, novel in ipairs(novels) do
-        local title = novel.title or ""
-        title = title:lower()
-        if title:find(query, 1, true) then
-            table.insert(filtered, Novel {
-                title = novel.title,
-                link = novel.link,
-                imageURL = novel.imageURL
-            })
-        end
-    end
-    -- Continue loading batches of 20 pages until all pages are loaded
-    while true do
-        -- Check if there are more pages to load
-        local nextPageExists = true
-        local lastPageDoc = GETDocument(
-            (baseURL .. "advance-search" .. (loadedPages > 1 and "?" .. pageQueryId .. "_page=" .. loadedPages or "")):gsub("(%w+://[^/]+)%.(com|net)(/|$)", "%1.space%3"),
-            { timeout = 60000, javascript = true }
-        )
-        local nextPageLink = lastPageDoc:selectFirst("a.w-pagination-next.next")
-        if not nextPageLink or not nextPageLink:attr("href") then
-            nextPageExists = false
-        end
-        if not nextPageExists then
-            break
-        end
-        -- Load the next batch of 20 pages
-        currentStartPage = currentStartPage + pageBatchSize
-        novels = loadAllNovels(currentStartPage, currentStartPage + pageBatchSize - 1)   
-        -- Update filtered list with new novels
-        for _, novel in ipairs(novels) do
-            local title = novel.title or ""
-            title = title:lower()
-            if title:find(query, 1, true) then
-                table.insert(filtered, Novel {
-                    title = novel.title,
-                    link = novel.link,
-                    imageURL = novel.imageURL
-                })
-            end
-        end
-    end
-    -- Paginate results
     local page = data[PAGE] or 1
+    
+    -- Check if we can reuse cached results for this query
+    if queryCache[query] then
+        matchingNovels = queryCache[query]
+    else
+        -- Clear cache for a fresh search
+        clearNovelsCache()
+        -- Initialize matching novels list
+        if not matchingNovels then
+            matchingNovels = {}
+        end
+        local seenFiltered = {} -- Prevent duplicates in filtered results
+        -- Load pages in batches
+        local pageBatchSize = 20
+        local currentStartPage = 1
+        
+        -- Continue loading batches until all pages are processed
+        while true do
+            local novels, hasMatches, nextPageLink = loadAllNovels(currentStartPage, currentStartPage + pageBatchSize - 1, query)
+            -- If there are matches in this batch, filter and add to matchingNovels
+            if hasMatches then
+                for _, novel in ipairs(novels) do
+                    local title = novel.title:lower()
+                    if title:find(query, 1, true) then
+                        local uniqueKey = novel.link .. "|" .. novel.title
+                        if not seenFiltered[uniqueKey] then
+                            seenFiltered[uniqueKey] = true
+                            table.insert(matchingNovels, Novel {
+                                title = novel.title,
+                                link = novel.link,
+                                imageURL = novel.imageURL
+                            })
+                        end
+                    end
+                end
+            end
+            -- Stop if there are no more pages to load
+            if not nextPageLink then
+                break
+            end
+            -- Move to the next batch
+            currentStartPage = currentStartPage + pageBatchSize
+        end
+        
+        -- Cache the results for this query
+        queryCache[query] = matchingNovels
+    end
+    
+    -- Paginate results
     local perPage = 20
     local startIndex = (page - 1) * perPage + 1
-    local endIndex = math.min(startIndex + perPage - 1, #filtered)
+    local endIndex = math.min(startIndex + perPage - 1, #matchingNovels)
     
-    -- Adjust for out-of-bounds pages
-    if startIndex > #filtered and #filtered > 0 then
-        startIndex = 1
-        endIndex = math.min(perPage, #filtered)
-        page = 1
-    elseif startIndex > #filtered then
+    -- Return empty result for out-of-bounds pages
+    if startIndex > #matchingNovels then
         return {}
     end
     
     local paged = {}
     for i = startIndex, endIndex do
-        if filtered[i] then
-            table.insert(paged, filtered[i])
+        if matchingNovels[i] then
+            table.insert(paged, matchingNovels[i])
         end
     end
     
     return paged
 end
+
 -- Return all properties in a lua table.
 return {
     id = id,
