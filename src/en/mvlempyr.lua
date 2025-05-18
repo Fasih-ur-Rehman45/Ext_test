@@ -1,4 +1,4 @@
--- {"id":620191,"ver":"1.0.15","libVer":"1.0.0","author":""}
+-- {"id":620191,"ver":"1.0.14","libVer":"1.0.0","author":""}
 local json = Require("dkjson")
 local bigint = Require("bigint")
 
@@ -27,9 +27,6 @@ local startIndex = 1
 
 --- Cache for all novels
 local allNovels = nil
-local loadedPages = 0 -- Track loaded pages
-local totalPages = nil -- Store total pages if detected
-local pageQueryId = "c5c66f03" -- Default pagination parameter
 
 --- Check for Cloudflare captcha
 local function checkCaptcha(doc)
@@ -38,45 +35,51 @@ local function checkCaptcha(doc)
         error("Captcha error, please open in webview")
     end
 end
-
---- Load novels from advance-search, with lazy loading
-local function loadAllNovels(pageToLoad)
-    if not allNovels then
-        allNovels = {}
+--- Load all novels from advance-search, inspired by TS getAllNovels (NLReader)
+local function loadAllNovels()
+    if allNovels then
+        return allNovels
     end
-    local seenLinks = allNovels.seenLinks or {}
-    if not pageToLoad then
-        pageToLoad = 1
-    end
+    allNovels = {}
+    local seenLinks = {}
+    local page = 1
+    local totalPages = nil -- Will be updated if total novels are found
+    local pageQueryId = "c5c66f03" -- Default pagination parameter
+    local useNextLink = true -- Flag to use "next page" links if total pages fail
 
-    -- Load only if not already loaded up to the requested page
-    while loadedPages < pageToLoad do
-        loadedPages = loadedPages + 1
-        local url = (baseURL .. "advance-search" .. (loadedPages > 1 and "?" .. pageQueryId .. "_page=" .. loadedPages or "")):gsub("(%w+://[^/]+)%.(com|net)(/|$)", "%1.space%3")
-        local document = GETDocument(url, {
-            timeout = 30000,  -- Reduced to 30 seconds for faster initial load
+    -- Initial page load
+    local url = (baseURL .. "advance-search"):gsub("(%w+://[^/]+)%.(com|net)(/|$)", "%1.space%3")
+    local document = GETDocument(url, {
+        timeout = 60000,  -- Increased to 90 seconds for better JavaScript rendering
+        javascript = true
+    })
+    checkCaptcha(document)
+    -- Try to parse total novels to calculate total pages
+    local totalTextElement = document:selectFirst(".w-page-count.hide")
+    local totalText = totalTextElement and totalTextElement:text() or nil
+    if totalText then
+        local _, _, current, total = totalText:match("Showing (%d+) out of (%d+) novels")
+        current = tonumber(current) or 0
+        total = tonumber(total) or 0
+        if total > 0 then
+            totalPages = math.ceil(total / 15) -- 15 novels per page
+            useNextLink = false -- Use total pages for iteration
+        end
+    end
+    -- Extract pagination parameter from "next page" link
+    local nextPageLink = document:selectFirst("a.w-pagination-next.next")
+    if nextPageLink and nextPageLink:attr("href") then
+        local href = nextPageLink:attr("href")
+        pageQueryId = href:match("%?([^=]+)_page=") or pageQueryId
+    end
+    while true do
+        -- Construct URL for the current page
+        url = (baseURL .. "advance-search" .. (page > 1 and "?" .. pageQueryId .. "_page=" .. page or "")):gsub("(%w+://[^/]+)%.(com|net)(/|$)", "%1.space%3")
+        document = GETDocument(url, {
+            timeout = 60000,
             javascript = true
         })
         checkCaptcha(document)
-
-        -- Detect total pages on first load
-        if loadedPages == 1 then
-            local totalTextElement = document:selectFirst(".w-page-count.hide")
-            local totalText = totalTextElement and totalTextElement:text() or nil
-            if totalText then
-                local _, _, current, total = totalText:match("Showing (%d+) out of (%d+) novels")
-                total = tonumber(total) or 0
-                if total > 0 then
-                    totalPages = math.ceil(total / 15)
-                end
-            end
-            local nextPageLink = document:selectFirst("a.w-pagination-next.next")
-            if nextPageLink and nextPageLink:attr("href") then
-                local href = nextPageLink:attr("href")
-                pageQueryId = href:match("%?([^=]+)_page=") or pageQueryId
-            end
-        end
-
         -- Parse novels on the current page
         local elements = document:select(".novelcolumn")
         local newNovelsFound = false
@@ -112,14 +115,30 @@ local function loadAllNovels(pageToLoad)
             ::continue::
         end
 
-        -- Stop if no new novels are found or all pages are loaded
-        if not newNovelsFound or (totalPages and loadedPages >= totalPages) then
-            allNovels.seenLinks = seenLinks
-            return allNovels
+        -- Stop if no new novels are found
+        if not newNovelsFound then
+            break
+        end
+
+        -- Decide whether to continue based on total pages or next page link
+        if not useNextLink then
+            -- Using total pages
+            if page >= totalPages then
+                break
+            end
+            page = page + 1
+        else
+            -- Using next page links
+            nextPageLink = document:selectFirst("a.w-pagination-next.next")
+            if nextPageLink and nextPageLink:attr("href") then
+                url = baseURL .. nextPageLink:attr("href")
+                page = page + 1
+            else
+                break
+            end
         end
     end
 
-    allNovels.seenLinks = seenLinks
     return allNovels
 end
 
@@ -162,6 +181,7 @@ local function parseNovel(novelURL)
     local url = expandURL(novelURL)
     local document = GETDocument(url)
     checkCaptcha(document)
+
     local desc = ""
     map(document:select(".synopsis p"), function(p)
         desc = desc .. '\n' .. p:text()
@@ -194,11 +214,13 @@ local function parseNovel(novelURL)
         end
         page = page + 1
     until #chapter_data < 500
+
     -- Reverse chapters to match TS implementation
     local reversedChapters = {}
     for i = 1, #chapters do
         reversedChapters[i] = chapters[#chapters - i + 1]
     end
+
     return NovelInfo({
         title = document:selectFirst(".novel-title2"):text():gsub("\n", ""),
         imageURL = img,
@@ -241,9 +263,8 @@ end
 local function search(data)
     local query = data[QUERY]:lower()
     
-    -- Load only the necessary pages based on the requested page
-    local requestedPage = data[PAGE] or 1
-    local novels = loadAllNovels(math.ceil(requestedPage * 20 / 15)) -- Load enough pages to cover the requested results (20 per page)
+    -- Load all novels, inspired by TS getAllNovels
+    local novels = loadAllNovels()
     local filtered = {}
     
     -- Filter novels based on search term, inspired by TS searchNovels
