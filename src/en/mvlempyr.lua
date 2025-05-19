@@ -1,4 +1,4 @@
--- {"id":620191,"ver":"1.0.27","libVer":"1.0.0","author":""}
+-- {"id":620191,"ver":"1.0.28","libVer":"1.0.0","author":""}
 local json = Require("dkjson")
 local bigint = Require("bigint")
 
@@ -216,19 +216,22 @@ local function search(data)
 end
 
 return {
-    id = id,
-    name = name,
-    baseURL = baseURL,
-    listings = { Listing("Default", true, getListing) },
-    getPassage = getPassage,
-    parseNovel = parseNovel,
-    shrinkURL = shrinkURL,
-    expandURL = expandURL,
+	-- Required
+	id = id,
+	name = name,
+	baseURL = baseURL,
+	listings = {
+        Listing("Default", true, getListing)
+    }, -- Must have at least one listing
+	getPassage = getPassage,
+	parseNovel = parseNovel,
+	shrinkURL = shrinkURL,
+	expandURL = expandURL,
     hasSearch = true,
     isSearchIncrementing = true,
     hasCloudFlare = true,
     search = search,
-    imageURL = imageURL,
-    chapterType = chapterType,
-    startIndex = startIndex,
+	imageURL = imageURL,
+	chapterType = chapterType,
+	startIndex = startIndex,
 }
