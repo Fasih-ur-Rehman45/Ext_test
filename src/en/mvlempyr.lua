@@ -32,14 +32,12 @@ local startIndex = 1
 
 local matchingNovels = nil
 local loadedPages = 0
-local totalPages = nil
 local pageQueryId = "c5c66f03"
 local queryCache = {}
 
 local function clearNovelsCache()
     matchingNovels = nil
     loadedPages = 0
-    totalPages = nil
 end
 
 local function loadAllNovels(startPage, endPage, query)
@@ -107,12 +105,13 @@ local function getPassage(chapterURL)
     local title = doc:selectFirst("h2.ChapterName span"):text()
     local htmlElement = doc:selectFirst("#chapter")
     local ht = "<h1>" .. title .. "</h1>"
-    local pTagList = map(doc:select("p"), text)
+    local pTagList = map(htmlElement:select("p"), text)
     local htmlContent = ""
     for _, v in pairs(pTagList) do
         htmlContent = htmlContent .. "<br><br>" .. v
     end
      ht = ht .. htmlContent
+     print(ht)
     return pageOfElem(Document(ht), true)
 end
 
