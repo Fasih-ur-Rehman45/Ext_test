@@ -1,4 +1,4 @@
--- {"id":620191,"ver":"1.0.28","libVer":"1.0.0","author":""}
+-- {"id":620191,"ver":"1.0.29","libVer":"1.0.0","author":""}
 local json = Require("dkjson")
 local bigint = Require("bigint")
 
@@ -10,6 +10,11 @@ local name = "MVLEMPYR"
 local chapterType = ChapterType.HTML
 
 local imageURL = "https://assets.mvlempyr.com/images/asset/LogoMage.webp"
+
+---@param v Element
+local text = function(v)
+    return v:text()
+end
 
 --base Url for the site
 
@@ -95,9 +100,20 @@ local function loadAllNovels(startPage, endPage, query)
 end
 
 local function getPassage(chapterURL)
-    local url = chapterURL:gsub("(%w+://[^/]+)%.net", "%1.space")
-    local doc = GETDocument(url)
-    return pageOfElem(doc:selectFirst("#chapter"), true)
+    -- Thanks to bigr4nd for figuring out that somehow .space domain bypasses cloudflare
+	local url = expandURL(chapterURL):gsub("(%w+://[^/]+)%.net", "%1.space")
+	--- Chapter page, extract info from it.
+	local doc = GETDocument(url)
+    local title = doc:selectFirst("h2.ChapterName span"):text()
+    local htmlElement = doc:selectFirst("#chapter")
+    local ht = "<h1>" .. title .. "</h1>"
+    local pTagList = map(doc:select("p"), text)
+    local htmlContent = ""
+    for _, v in pairs(pTagList) do
+        htmlContent = htmlContent .. "<br><br>" .. v
+    end
+     ht = ht .. htmlContent
+    return pageOfElem(Document(ht), true)
 end
 
 local function calculateTagId(novel_code)
