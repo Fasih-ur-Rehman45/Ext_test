@@ -17,10 +17,8 @@ jobs:
     container: openjdk:11
     steps:
     - uses: actions/checkout@v4
-    
     - name: Make script executable
       run: chmod +x ./dev-setup.sh
-    
     - name: Setup environment
       run: |
         if [ -x "$(command -v bash)" ]; then
@@ -28,13 +26,19 @@ jobs:
         else
           sh ./dev-setup.sh --tester
         fi
-    
+    - name: Verify tester jar
+      run: |
+        if [ -f "bin/extension-tester.jar" ]; then
+          echo "Tester jar found"
+        else
+          echo "Tester jar not found, failing build"
+          exit 1
+        fi
     - name: Cache dependencies
       uses: actions/cache@v3
       with:
         path: bin
         key: ${{ runner.os }}-bin-${{ hashFiles('dev-setup.sh') }}
-    
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -83,7 +87,7 @@ jobs:
             case "$file" in
               *.lua)
                 echo "Validating Lua file: $file"
-                java -jar bin/extension-tester.jar --ci --validate-metadata "$file"
+                java -jar bin/extension-tester.jar --ci --validate-metadata "./$file"
                 ;;
               *)
                 echo "Skipping non-Lua file: $file"
@@ -105,6 +109,10 @@ jobs:
       with:
         name: bin-artifact
         path: bin
+    - name: Test network
+      run: |
+        apt-get update && apt-get install -y curl
+        curl -I https://www.mvlempyr.com/ || echo "Network test failed, proceeding anyway"
     - name: Get changed files
       id: changed-files
       uses: tj-actions/changed-files@v41
@@ -115,11 +123,11 @@ jobs:
         if [ -n "${{ steps.changed-files.outputs.all_changed_files }}" ]; then
           echo "Changed files found"
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            if [ -f "$file" ]; then
+            if [ -f "./$file" ]; then
               case "$file" in
                 *.lua)
                   echo "Testing Lua file: $file"
-                  java -jar bin/extension-tester.jar --ci "$file"
+                  java -jar bin/extension-tester.jar --ci "./$file"
                   ;;
                 *)
                   echo "Skipping non-Lua file: $file"
@@ -147,14 +155,10 @@ jobs:
         cp -r lib public/
         cp -r icons public/
         cp index.json public/
-    
-    # Generate a GitHub Pages configuration file
     - name: Create GitHub Pages config
       run: |
         echo "# GitHub Pages Configuration" > public/README.md
         echo "This repository contains extensions for the application." >> public/README.md
-    
-    # Configure GitHub Pages deployment
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
