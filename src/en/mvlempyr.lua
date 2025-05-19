@@ -32,12 +32,14 @@ local startIndex = 1
 
 local matchingNovels = nil
 local loadedPages = 0
+local totalPages = nil
 local pageQueryId = "c5c66f03"
 local queryCache = {}
 
 local function clearNovelsCache()
     matchingNovels = nil
     loadedPages = 0
+    totalPages = nil
 end
 
 local function loadAllNovels(startPage, endPage, query)
@@ -111,7 +113,6 @@ local function getPassage(chapterURL)
         htmlContent = htmlContent .. "<br><br>" .. v
     end
      ht = ht .. htmlContent
-     print(ht)
     return pageOfElem(Document(ht), true)
 end
 
