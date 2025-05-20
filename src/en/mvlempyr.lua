@@ -1,4 +1,4 @@
--- {"id":620191,"ver":"1.0.31","libVer":"1.0.0","author":""}
+-- {"id":620191,"ver":"1.0.30","libVer":"1.0.0","author":""}
 local json = Require("dkjson")
 local bigint = Require("bigint")
 
@@ -29,7 +29,6 @@ local loadedPages = 0
 local totalPages = nil
 local pageQueryId = "c5c66f03"
 local queryCache = {}
-local allNovelsCache = nil -- New global cache for all novels
 
 local function clearNovelsCache()
     matchingNovels = nil
@@ -88,6 +87,8 @@ local function loadAllNovels(startPage, endPage, query)
         end)
         for _, novel in ipairs(newNovels) do
             table.insert(novels, novel)
+            if name:lower():find(query, 1, true) then hasMatches = true end
+               newNovelsFound = true 
         end
         if not newNovelsFound then return novels, hasMatches, nextPageLink end
         ::continue::
@@ -96,7 +97,9 @@ local function loadAllNovels(startPage, endPage, query)
 end
 
 local function getPassage(chapterURL)
+    -- Thanks to bigr4nd for figuring out that somehow .space domain bypasses cloudflare
     local url = expandURL(chapterURL):gsub("(%w+://[^/]+)%.net", "%1.space")
+    --- Chapter page, extract info from it.
     local doc = GETDocument(url)
     local title = doc:selectFirst("h2.ChapterName span"):text()
     local htmlElement = doc:selectFirst("#chapter")
@@ -170,24 +173,6 @@ local function getListing(data)
             error("Failed to find listing match")
         end
     end
-    -- Pre-load all novels and cache them
-    if not allNovelsCache then
-        local currentStartPage = 1
-        allNovelsCache = {}
-        local seenLinks = {}
-        while true do
-            local novels, _, nextPageLink = loadAllNovels(currentStartPage, currentStartPage + 19, "")
-            for _, novel in ipairs(novels) do
-                local key = novel.link .. "|" .. novel.title
-                if not seenLinks[key] then
-                    seenLinks[key] = true
-                    table.insert(allNovelsCache, novel)
-                end
-            end
-            if not nextPageLink then break end
-            currentStartPage = currentStartPage + 20
-        end
-    end
     return map(document:select(".g-tpage div.searchlist[role=\"listitem\"] .novelcolumn .novelcolumimage a"), function(v)
         return Novel {
             title = v:attr("title"),
@@ -200,23 +185,44 @@ end
 local function search(data)
     local query = (data[QUERY] or ""):lower()
     local page = data[PAGE] or 1
-    if not allNovelsCache then
-        error("allNovelsCache not initialized. Call getListing first.")
+    if queryCache[query] then
+        matchingNovels = queryCache[query]
+    else
+        clearNovelsCache()
+        matchingNovels = matchingNovels or {}
+        local seenFiltered = {}
+        local pageBatchSize, currentStartPage = 20, 1
+        while true do
+            local novels, hasMatches, nextPageLink = loadAllNovels(currentStartPage, currentStartPage + pageBatchSize - 1, query)
+            if hasMatches then
+                for _, novel in ipairs(novels) do
+                    local title = novel.title:lower()
+                    if title:find(query, 1, true) then
+                        local key = novel.link .. "|" .. novel.title
+                        if not seenFiltered[key] then
+                            seenFiltered[key] = true
+                            table.insert(matchingNovels, Novel {
+                                title = novel.title,
+                                link = novel.link,
+                                imageURL = novel.imageURL
+                            })
+                        end
+                    end
+                end
+            end
+            if not nextPageLink then break end
+            currentStartPage = currentStartPage + pageBatchSize
+        end
+        queryCache[query] = matchingNovels
     end
+
     local perPage = 20
     local startIndex = (page - 1) * perPage + 1
-    local endIndex = math.min(startIndex + perPage - 1, #allNovelsCache)
-    if startIndex > #allNovelsCache then return {} end
+    local endIndex = math.min(startIndex + perPage - 1, #matchingNovels)
+    if startIndex > #matchingNovels then return {} end
     local paged = {}
     for i = startIndex, endIndex do
-        local novel = allNovelsCache[i]
-        if novel and (query == "" or novel.title:lower():find(query, 1, true)) then
-            table.insert(paged, Novel {
-                title = novel.title,
-                link = novel.link,
-                imageURL = novel.imageURL
-            })
-        end
+        if matchingNovels[i] then table.insert(paged, matchingNovels[i]) end
     end
     return paged
 end
